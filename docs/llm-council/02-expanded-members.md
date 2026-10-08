@@ -21,6 +21,7 @@
 | 경로 | 비용 | 확인된 사실 | 비고 |
 |---|---|---|---|
 | **Meta 공식 Llama API** | ⚠️ 불명확 | 2025-04 LlamaCon에서 **제한적 프리뷰**로 공개, 가격 미공개 ([TechCrunch](https://techcrunch.com/2025/04/29/meta-previews-an-api-for-its-llama-ai-models/)). 2026년 현재 공식 단가 확인 불가 ([Gate.AI](https://gate.ai/blog/llama-3-1-405b-instruct-specs-pricing-api-access-use-cases)), 서비스 종료 주장도 있으나 미확인 ([Spheron](https://www.spheron.network/blog/meta-shut-down-the-llama-api-self-hosting-llama-is-now-offic/)) | 현재로선 비추천 |
+| **Meta Model API (Muse Spark, 2026-10-08 추가 조사)** | 유료 + 신규 크레딧 | Meta Superintelligence Labs의 **비공개(closed) 모델 Muse Spark**를 제공하는 공식 개발자 API. 2026-07-09 공개 프리뷰 출시, **신규 계정당 $20 무료 크레딧**, OpenAI 호환 방식 — 단 **미국 개발자 대상**으로 보도됨 ⚠️ ([AIChatDaily](https://www.aichatdaily.com/ai-models/meta-opens-muse-spark-1-1-developers-via), [FourWeekMBA](https://fourweekmba.com/ai-meta-muse-spark-1-1-meta-model-api-closed-pivot/)). Muse Spark 1.3(2026-09) 표준 단가 입력 $1.25 / 출력 $4.25, Meta가 트래픽을 학습에 쓰도록 허용하는 저가 엔드포인트도 있음 ⚠️ ([eesel](https://www.eesel.ai/blog/muse-spark-1-3-pricing)) | 🔎 Meta의 **최신 관점**을 넣으려면 이 경로. 한국에서 가입 가능한지 먼저 확인 필요 |
 | **Meta AI 앱(소비자용)** | 무료 | API로 제공되지 않음 ([Metronome pricing index](https://metronome.com/pricing-index/meta-ai)) | 자동 연결 불가. 브라우저 자동화는 약관 리스크 |
 | **Groq (Llama 호스팅)** | 무료 등급 | Llama 3.3 70B 무료 한도 약 1,000회/일·30회/분, Llama 3.1 8B 약 14,400회/일 (출처 간 불일치 ⚠️). 한도는 API 키별이 아니라 **계정(조직) 단위** ([eesel](https://eesel.ai/blog/groq-pricing), [OpenRouter 블로그](https://openrouter.ai/blog/tutorials/free-llm-apis-compared/), [LocalAIMaster](https://localaimaster.com/blog/groq-api-free-guide)) | **추천**: 빠르고 무료 |
 | **OpenRouter** | 무료/유료 | Meta 모델 제공 ([OpenRouter setup guide](https://cdn.jsdelivr.net/npm/@saibolla/ada@0.1.3/skills/perplexity-search/references/openrouter_setup.md)). `:free` Llama 모델 ID는 시기별로 달라 미확인 ⚠️ ([aitoolsradar](https://aitoolsradar.org/blog/guides/openrouter-free-models-2026/)) | 관문 통일용 |
@@ -44,6 +45,7 @@
 | ↳ 구독 없이 사용 | 선불 크레딧 | **Pro 구독 없이도 API 사용 가능** — API는 구독과 별도로 결제되며, 결제수단 등록 → 크레딧 구매 → 잔액이 있을 때 API 키 발급 ([Perplexity Getting Started](https://docs.perplexity.ai/getting-started), [Apideck](https://radar.apideck.com/blog/how-to-get-your-perplexity-api-key)). 최소 구매액은 미확인 ⚠️ | 🔎 **구독 불필요** |
 | ↳ Pro 구독 혜택 | 구독 시 | Pro 구독자에게 매월 API 크레딧 $5 지급 ([Perplexity Help](https://hub-prod.perplexity.ai/hub/faq/pplx-api)) — 단, 2026년에는 이 혜택이 없어졌다는 보고도 있음 ⚠️ ([Perplexity Community](https://community.perplexity.ai/t/perplexity-pro-bonus-for-the-api-is-set-to-zero/51), [Apideck](https://radar.apideck.com/blog/how-to-get-your-perplexity-api-key)) | 🔎 API만을 위해 $20/월 구독은 비효율 |
 | ↳ 주의 | — | Sonar Chat Completions 엔드포인트가 2026-09-27까지 지원 후 Agent API로 이전한다는 보도 ([CloudZero](https://www.cloudzero.com/blog/perplexity-api-pricing/)) ⚠️ | 연결 시 현재 엔드포인트 확인 필수 |
+| ↳ 무료 계정 | — | 무료 계정은 API 크레딧 없음(신규 API 계정도 무료 크레딧 없음) ([Apideck](https://radar.apideck.com/blog/how-to-get-your-perplexity-api-key)). 웹의 **Computer·자동화** 기능은 Max 전용으로 보도됨 ⚠️ ([EntrepreneurLoop](https://entrepreneurloop.com/perplexity-computer-launch-automate-workflows/), [SecondTalent](https://www.secondtalent.com/resources/perplexity-ai-features-capabilities-2026/)) | 🔎 무료 계정 로그인으로 Council 자동 연결은 불가 |
 | **Perplexity 공식 MCP 서버** | API 크레딧 | Claude Code에 연결하면 `perplexity_search`·`perplexity_ask` 등 도구로 Perplexity를 호출. npm 패키지 `@perplexity-ai/mcp-server`, `PERPLEXITY_API_KEY` 필요 ([Perplexity MCP 문서](https://docs.perplexity.ai/guides/mcp-server), [API Tracker](https://apitracker.io/mcp-server/perplexity)) | 🔎 `claude -p`는 Claude만 실행하므로 Perplexity를 쓰려면 이 경로나 API가 필요. Claude가 결과를 요약·선별하지 않도록 **원문을 Fact Sheet에 그대로 저장** |
 | **pplx CLI (Perplexity 공식)** | API 크레딧(추정) | 2026-07-24 발표된 공식 터미널 도구. 검색 API를 호출해 결과를 JSON으로 출력, macOS(Apple Silicon)·Linux 지원 — **Windows 지원은 언급 없음**. 계정(Pro) 로그인 방식은 확인 못함 ⚠️ ([窓の杜](https://forest.watch.impress.co.jp/docs/news/2128588.html)) | 🔎 검색 API 기반이라 API 키·크레딧이 필요할 가능성이 높음 |
 | ↳ 비공식 도구 (참고만) | Pro 구독 | `perplexity-web-mcp`는 Pro/Max 계정 로그인으로 웹 인터페이스를 이용하는 **비공식** 도구 ([PyPI](https://pypi.org/project/perplexity-web-mcp-cli/0.14.6/)) | 🔎 웹 화면 우회 방식이라 고장·약관 위험 → **비추천** |
@@ -73,7 +75,7 @@
 | OpenAI | Codex CLI (`codex exec`) | ✅ | ✅ (Free 플랜 포함, 한도 미확인) | [OpenAI Help](https://help.openai.com/en/articles/11369540-codex-usage-limits) |
 | xAI | Grok Build CLI (`grok -p`) | ✅ | ❌ (유료 구독 필요, 등급 ⚠️) | [The Decoder](https://the-decoder.com/x-ai-plays-catch-up-with-grok-build-its-first-terminal-based-coding-agent/) |
 | Perplexity | pplx CLI | ⚠️ 미확인 (API 기반 추정) | ❌ (무료 API 없음) | [窓の杜](https://forest.watch.impress.co.jp/docs/news/2128588.html), [Apideck](https://radar.apideck.com/blog/how-to-get-your-perplexity-api-key) |
-| Meta | 없음 (Llama는 Groq·OpenRouter·로컬) | — | Groq 무료 | 1.1 참고 |
+| Meta | 계정 로그인 CLI **찾지 못함**. API는 Meta Model API(Muse Spark) | ❌ (API 키 방식) | 신규 $20 크레딧(미국 개발자 대상 보도 ⚠️). 공개 가중치 Llama는 Groq 무료·로컬 | 1.1 참고 |
 
 - 🔎 **[Claude 추론]** "계정만으로 연결"은 회사가 **구독 계정으로 로그인하는 공식 CLI**를 제공할 때만 가능합니다. Google·OpenAI는 무료 계정까지 열어 두었고, xAI는 유료 구독자에게만, Perplexity는 구독과 API를 분리해 과금합니다.
 - 🔎 **비용 비교**: Grok을 Council 용도로만 쓴다면 SuperGrok(약 $30/월)보다 **API 종량제(회의 1회 약 $0.02)** 가 훨씬 저렴합니다. 다른 용도로도 Grok을 많이 쓴다면 구독 + Grok Build CLI가 나을 수 있습니다.
@@ -207,6 +209,8 @@ flowchart LR
 - Grok 구독 가격 — https://www.ai-toolbox.co/grok-models/grok-pricing-plans-api-2026 , https://www.eesel.ai/blog/grok-4-5-pricing
 - Perplexity pplx CLI — https://forest.watch.impress.co.jp/docs/news/2128588.html , 비공식 perplexity-web-mcp — https://pypi.org/project/perplexity-web-mcp-cli/0.14.6/
 - Perplexity 공식 MCP — https://docs.perplexity.ai/guides/mcp-server , https://apitracker.io/mcp-server/perplexity
+- Perplexity Computer — https://entrepreneurloop.com/perplexity-computer-launch-automate-workflows/ , https://www.secondtalent.com/resources/perplexity-ai-features-capabilities-2026/
+- Meta Model API(Muse Spark) — https://www.aichatdaily.com/ai-models/meta-opens-muse-spark-1-1-developers-via , https://fourweekmba.com/ai-meta-muse-spark-1-1-meta-model-api-closed-pivot/ , https://www.eesel.ai/blog/muse-spark-1-3-pricing
 - OpenAI Codex — https://help.openai.com/en/articles/11369540-codex-usage-limits , https://developers.openai.com/codex/noninteractive
 - OpenAI API 가격(서드파티) — https://morphllm.com/openai-api-pricing , https://intuitionlabs.ai/articles/chatgpt-api-pricing-2026-token-costs-limits
 - OpenAI Terms of Use — https://openai.com/policies/terms-of-use/
