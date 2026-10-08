@@ -253,6 +253,7 @@ nous-zero/
 3. **YouTube Data API 키** 발급(Google Cloud 프로젝트)
 4. Playboard 성장 순위의 **산식·이용약관** 확인
 5. Phase A 착수 여부 → 승인 시 Claude Code로 `llm-council` 스킬과 프롬프트 초안 작성
+6. Meta·Grok·Perplexity·GPT 등 위원 확장 → [`02-expanded-members.md`](./02-expanded-members.md) 참고
 
 ---
 
