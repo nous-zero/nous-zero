@@ -55,6 +55,7 @@
 - **함정 2: 위치·장황함 편향** — LLM-as-a-Judge는 답변 순서(position), 길이(verbosity), 자기 강화(self-enhancement) 편향을 보입니다. ([Zheng et al., 2023, arXiv:2306.05685](https://arxiv.org/abs/2306.05685))
 - Karpathy도 위원들의 상호 순위가 자신의 판단과 **다를 때가 있었다**고 밝혔습니다(2차 보도). ([CXO Digital Pulse](https://www.cxodigitalpulse.com/karpathys-llm-council-experiment-shows-gpt-5-1-leading-peer-based-ai-evaluations/))
 - 🔎 **[Claude 추론]** 따라서 Council의 결론은 "다수결"이 아니라 **"데이터 + 루브릭(채점 기준) + 소수 의견 기록"** 으로 내려야 편향을 줄일 수 있습니다.
+- **두 층의 편향 구분 (2026-10-08 인터뷰 보완)**: LLM Council을 쓰는 목적 자체가 **① 한 모델(예: Claude 단독)의 편향을 줄이는 것**입니다. 그런데 Council 안의 상호평가·의장 종합 단계도 LLM이 심사하는 과정이라 **② 심사 단계의 편향**이 생길 수 있습니다. 원본 llm-council이 답변을 익명화하는 이유도 이 ②번 때문입니다("the LLM can't play favorites", [karpathy/llm-council](https://github.com/karpathy/llm-council)). 3.2의 장치들은 Council과 별개의 대책이 아니라 **Council이 ①번 목적을 제대로 달성하게 만드는 핵심 구성요소**입니다. 🔎 특히 이 설계는 의장이 Claude이므로, 의장 교대·루브릭이 없으면 최종 종합이 다시 Claude 쪽으로 기울어 ①번 목적이 약해질 수 있습니다.
 
 ### 2.3 비용·한도 (보유 구독 기준)
 
@@ -116,7 +117,7 @@ flowchart LR
     M --> D
 ```
 
-- 🔎 **[Claude 추론] 편향 완화 장치**
+- 🔎 **[Claude 추론] 편향 완화 장치** — Council의 구성요소(1번 중 '모델명 제거'는 원본에 이미 있는 장치, 나머지는 이 설계에서 보강)
   1. Stage 2에서 모델명 제거 + **답변 순서 무작위화** (위치 편향 대응, [Zheng et al.](https://arxiv.org/abs/2306.05685))
   2. 의장은 "누가 말했나"가 아니라 **루브릭 항목별 점수 + Fact Sheet 인용**으로만 결론
   3. 의장 역할을 주기적으로 Gemini와 **교대** (자기 선호 편향 대응, [Panickssery et al.](https://arxiv.org/abs/2404.13076))
