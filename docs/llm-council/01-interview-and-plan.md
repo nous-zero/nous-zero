@@ -257,6 +257,7 @@ nous-zero/
 6. Meta·Grok·Perplexity·GPT 등 위원 확장 → [`02-expanded-members.md`](./02-expanded-members.md) 참고
 7. **Phase A 구현 (2026-10-08)**: [`council/`](../../council/README.md) 폴더와 [`.claude/skills/llm-council`](../../.claude/skills/llm-council/SKILL.md) 스킬. $0 구성(Claude·Gemini·Codex + 브라우저 수동 Meta AI·Perplexity·Grok), 유료 위원은 사용자 요청 전까지 보류
 8. **사용 가이드**: [`03-claude-code-usage-guide.md`](./03-claude-code-usage-guide.md)
+9. **Windows 로컬 테스트**: [`04-windows-local-test.md`](./04-windows-local-test.md)
 
 ---
 

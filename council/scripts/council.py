@@ -257,6 +257,7 @@ def collect(run: Path, stage_dir: str, members: list[dict], prompts: dict[str, s
         return waiting
 
     print(f"  > 동시 호출: {', '.join(m['id'] for m in to_run)}", flush=True)
+    started = time.monotonic()
     with ThreadPoolExecutor(max_workers=len(to_run)) as pool:
         futures = {pool.submit(call_member, m, prompts[m["id"]]): m for m in to_run}
         for future in as_completed(futures):
@@ -264,12 +265,12 @@ def collect(run: Path, stage_dir: str, members: list[dict], prompts: dict[str, s
             try:
                 text = future.result()
             except MemberError as e:
-                print(f"  ! {m['id']}: 실패 - {e}", flush=True)
+                print(f"  ! {m['id']}: 실패 ({time.monotonic() - started:.1f}초) - {e}", flush=True)
                 write(run / "logs" / f"{stage_dir}-{m['id']}.log", f"{dt.datetime.now().isoformat()}\n{e}\n")
                 continue
             response_path = run / stage_dir / "responses" / f"{m['id']}.md"
             write(response_path, text + "\n")
-            print(f"  ✓ {m['id']}: 저장 {response_path.relative_to(run)}", flush=True)
+            print(f"  ✓ {m['id']}: 저장 {response_path.relative_to(run)} ({time.monotonic() - started:.1f}초)", flush=True)
     return waiting
 
 

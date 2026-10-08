@@ -66,6 +66,8 @@ python council/scripts/council.py check
 
 ### 1.5 첫 실험: 실제 응답 확인
 
+> 단계별 통과 기준이 있는 전체 체크리스트는 [04-windows-local-test.md](./04-windows-local-test.md)에 있습니다.
+
 로그인까지 마쳤다면 회의 전에 위원들이 실제로 답하는지 시험합니다.
 
 ```powershell
