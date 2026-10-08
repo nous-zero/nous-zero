@@ -23,7 +23,7 @@ argument-hint: "<안건>"
 ## 절차
 
 ### 0. 점검
-`python council/scripts/council.py check` — 꺼져 있거나 설치되지 않은 위원을 사용자에게 알린다.
+`python council/scripts/council.py check` — 꺼져 있거나 설치되지 않은 위원을 사용자에게 알린다. 처음 쓰는 날이나 위원이 실패한 뒤에는 `check --ping`으로 실제 응답까지 확인한다.
 
 ### 1. 안건과 자료
 1. `python council/scripts/council.py new "<안건>" [--rubric youtube-growth]` → 출력된 경로가 `$RUN`.
@@ -33,7 +33,9 @@ argument-hint: "<안건>"
 ### 2. Stage 1 — 독립 의견
 1. `python council/scripts/council.py stage1 $RUN` — Gemini·Codex 같은 CLI 위원은 스크립트가 자동으로 부른다(몇 분 걸릴 수 있음).
 2. `claude`(서브에이전트): 규칙 3의 문구로 `$RUN/stage1/prompts/claude.md`를 넘기고, 결과를 `$RUN/stage1/responses/claude.md`에 저장한다.
-3. `meta-ai`·`perplexity`·`grok-web`(브라우저 위원): 사용자에게 이번 회의의 방식을 묻는다.
+3. `meta-ai`·`perplexity`·`grok-web`(브라우저 위원): `members.json`의 `settings.browser_mode`를 따른다. 사용자가 이번 회의에서 다른 방식을 말하면 그것을 따른다.
+   - `assist`(기본) → A. 단, Claude in Chrome 도구가 없거나 사용자가 없는 무인 실행(`claude -p` 등)이면 C로 바꾸고 그 사실을 보고한다.
+   - `paste` → B, `skip` → C, `ask` → 회의마다 사용자에게 묻는다.
    - **A. 브라우저 보조 (사용자가 지켜봄)** — Claude in Chrome 도구가 연결되어 있을 때.
      1. 위원마다 새 탭에서 `members.json`의 `browser_url`을 열고 새 대화를 시작한다.
      2. `$RUN/stage1/prompts/<id>.md` 전문을 입력창에 붙여넣고 보낸다.

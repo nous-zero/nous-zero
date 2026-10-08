@@ -12,6 +12,8 @@
       "claude"
     ],
     "min_responses": 2,
+    "browser_mode": "assist",
+    "browser_mode_note": "assist: 사용자가 지켜보는 가운데 Claude in Chrome이 입력·복사 (Chrome 미연결 또는 무인 실행이면 skip) / paste: 사용자가 직접 붙여넣기 / skip: 생략 / ask: 회의마다 묻기",
     "self_reference_terms": [
       "Claude",
       "Anthropic",

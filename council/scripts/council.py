@@ -37,11 +37,13 @@ import string
 import subprocess
 import sys
 import tempfile
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
 
 AUTOMATED_TYPES = {"command", "openai_compatible"}
+PING_PROMPT = "Reply with exactly one word: OK"
 WAITING_TYPES = {"subagent", "manual"}
 DEFAULT_COUNCIL_DIR = Path(__file__).resolve().parent.parent
 
@@ -345,7 +347,26 @@ def cmd_check(council: Council, args) -> int:
         else:
             detail = "사용자가 브라우저 답변을 붙여넣음"
         print(f"- {m['id']:<16} [{state}] {kind:<18} {detail}")
-    return 0
+    if not getattr(args, "ping", False):
+        return 0
+    print("\n실제 호출 시험 (--ping): 켜져 있는 자동 위원에게 짧은 질문을 보냅니다")
+    failed = 0
+    for m in council.config["members"]:
+        if not m.get("enabled") or m.get("type") not in AUTOMATED_TYPES:
+            continue
+        if m.get("paid") and not args.allow_paid:
+            print(f"  - {m['id']}: 유료 위원이라 건너뜀")
+            continue
+        started = time.monotonic()
+        try:
+            reply = call_member({**m, "timeout": min(m.get("timeout", 600), args.ping_timeout)}, PING_PROMPT)
+        except MemberError as e:
+            failed += 1
+            print(f"  ! {m['id']}: 실패 ({time.monotonic() - started:.1f}초) - {e}")
+            continue
+        short = " ".join(reply.split())[:60]
+        print(f"  ✓ {m['id']}: 성공 ({time.monotonic() - started:.1f}초) - {short}")
+    return 1 if failed else 0
 
 
 def server_up(base_url: str) -> bool:
@@ -640,7 +661,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--council-dir", type=Path, default=DEFAULT_COUNCIL_DIR)
     sub = parser.add_subparsers(dest="command", required=True)
 
-    sub.add_parser("check")
+    p = sub.add_parser("check")
+    p.add_argument("--ping", action="store_true", help="자동 위원에게 실제로 짧은 질문을 보내 응답 확인")
+    p.add_argument("--ping-timeout", type=int, default=180, help="--ping 때 위원별 최대 대기 시간(초)")
+    p.add_argument("--allow-paid", action="store_true", help="유료 위원 허용 (사용자 요청 시에만)")
     p = sub.add_parser("new")
     p.add_argument("topic")
     p.add_argument("--rubric")

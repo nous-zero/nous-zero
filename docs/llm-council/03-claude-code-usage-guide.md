@@ -18,7 +18,7 @@
    └─ 5. 기록        decision-log.md → 나중에 "실행 결과" 기입
 ```
 
-**내가 할 일**은 ① 안건 입력 ② 자료 확인 ③ 브라우저 위원 방식 선택(지켜보기 / 직접 붙여넣기 / 생략) ④ 결과 읽고 실행 — 네 가지입니다.
+**내가 할 일**은 ① 안건 입력 ② 자료 확인 ③ 브라우저 작업 지켜보기(로그인·CAPTCHA가 나오면 처리) ④ 결과 읽고 실행 — 네 가지입니다. 나머지는 Claude Code가 자동으로 진행합니다.
 
 ---
 
@@ -64,7 +64,23 @@ python council/scripts/council.py check
 ```
 `없음`이 나오면 8장 문제 해결을 보세요.
 
-### 1.5 (선택) 브라우저 보조를 쓰려면: Claude in Chrome 연결
+### 1.5 첫 실험: 실제 응답 확인
+
+로그인까지 마쳤다면 회의 전에 위원들이 실제로 답하는지 시험합니다.
+
+```powershell
+python council/scripts/council.py check --ping
+```
+- 켜져 있는 자동 위원(Gemini·Codex)에게 `Reply with exactly one word: OK`를 보내고 위원별 성공·실패와 걸린 시간을 보여줍니다. 위원마다 최대 180초 기다립니다(`--ping-timeout`으로 조절).
+- 🧪 성공하면 `✓ gemini: 성공 (… 초) - OK`처럼, 실패하면 `! codex: 실패 … - <오류>`처럼 나옵니다. 로그인 전 Gemini는 `종료 코드 41: Please set an Auth method ...`를 냈습니다.
+- 둘 다 성공하면 **연습 회의**를 한 번 엽니다. 가벼운 안건으로 전체 흐름을 확인하는 용도입니다.
+  ```
+  /llm-council 연습: 아침 루틴에서 LeetCode와 GDPO 주석 중 무엇을 먼저 할까
+  ```
+  처음에는 "이번엔 브라우저 위원 생략"이라고 해서 CLI 위원만으로 끝까지 가 보고, 그다음 회의에서 브라우저 보조를 켜는 순서를 권합니다(🔎 [Claude 추론] 문제가 생겼을 때 원인을 나눠 찾기 쉬움).
+- 실패하면 오류 문구를 Claude Code에 그대로 붙여넣어 주세요.
+
+### 1.6 (선택) 브라우저 보조를 쓰려면: Claude in Chrome 연결
 - Chrome(또는 Edge)에 Claude 확장 프로그램을 설치하고, Claude Code를 `claude --chrome`으로 시작하거나 세션 중에 `/chrome`을 실행합니다. `/chrome`에서 "Enabled by default"를 고르면 매번 플래그를 붙이지 않아도 됩니다 ([Claude Code Chrome 문서](https://code.claude.com/docs/en/chrome)).
 - 브라우저 작업은 새 탭에서, 내가 볼 수 있는 Chrome 창에서 실시간으로 진행되고, 이미 로그인된 상태를 그대로 씁니다. 로그인 화면이나 CAPTCHA가 나오면 멈추고 나에게 넘깁니다 ([Claude Code Chrome 문서](https://code.claude.com/docs/en/chrome)).
 - 지원 브라우저는 Google Chrome과 Microsoft Edge(베타)이며 WSL에서는 지원되지 않습니다 ([Claude Code Chrome 문서](https://code.claude.com/docs/en/chrome)).
@@ -101,7 +117,7 @@ python council/scripts/council.py check
 
 ## 4. 브라우저 위원(Meta AI·Perplexity·Grok) 참여 방식
 
-독립 의견 단계(스크립트의 Stage 1)에서 Claude가 매번 묻습니다. 셋 중 하나를 고르세요.
+기본값은 **A. 브라우저 보조(자동)** 입니다(`council/members.json`의 `settings.browser_mode`: `assist`). Chrome이 연결되지 않았거나 사람이 없는 무인 실행이면 Claude가 C(생략)로 바꾸고 알려줍니다. 회의 중에 "이번엔 직접 붙여넣을게"처럼 말하면 그 회의만 바뀝니다. 기본값을 바꾸려면 `browser_mode`를 `paste`·`skip`·`ask`(매번 묻기) 중 하나로 고칩니다.
 
 | 방식 | 언제 | 진행 |
 |---|---|---|
@@ -114,6 +130,13 @@ python council/scripts/council.py check
 - ⚠️ 각 사이트 약관의 자동화 관련 조항은 원문으로 확인하지 못했습니다. A 방식을 쓰기 전에 각 사이트 하단의 Terms 링크를 한 번 확인하세요.
 
 ---
+
+### 4.1 의장은 왜 바뀌나요?
+
+- LLM 평가자는 자기가 쓴 글을 알아보고 더 높게 평가하는 경향이 있습니다 ([Panickssery et al., NeurIPS 2024](https://arxiv.org/abs/2404.13076)).
+- 🔎 [Claude 추론] 의장이 늘 Claude면 최종 종합이 Claude 쪽 관점으로 기울 수 있어, "Claude만으로는 편향된다"는 처음 목적이 약해집니다. 그래서 회의마다 Claude ↔ Gemini가 번갈아 의장을 맡고, 결과를 쌓아 의장에 따라 결론이 달라지는지 비교할 수 있게 했습니다.
+- 참고로 원본 llm-council의 기본 의장도 Claude가 아니라 Gemini 3 Pro입니다 ([karpathy/llm-council](https://github.com/karpathy/llm-council)).
+- 고정하고 싶으면 "의장은 항상 gemini로"라고 말하거나 `settings.chair_rotation`을 한 명으로 줄이면 됩니다.
 
 ## 5. 결과 읽는 법 (`decision-log.md`)
 
@@ -162,7 +185,7 @@ python council/scripts/council.py check
 | `check`에서 `명령 gemini: 없음` | Node.js 설치 후 새 PowerShell 창에서 `npm install -g @google/gemini-cli` 다시 실행 |
 | Gemini 실패: `Please set an Auth method ...` | 🧪 로그인 전 상태의 메시지. `gemini` 실행 → Google 로그인 |
 | Codex 실패 (로그인 관련) | `codex login` 다시 실행 |
-| 위원이 `시간 초과` | `council/members.json`에서 해당 위원의 `timeout`(초)을 늘림 |
+| 위원이 `시간 초과` | 네트워크·로그인 문제로 CLI가 재연결을 반복하는 경우가 있음(🧪 이 작업 환경에서 Codex가 네트워크 차단 때문에 계속 재연결). 먼저 `check --ping`으로 확인하고, 응답이 느린 것뿐이면 `council/members.json`의 `timeout`(초)을 늘림 |
 | `응답이 1개뿐입니다. 최소 2개가 필요합니다` | 실패한 위원 오류는 `council/runs/<회의>/logs/`에 있음. 해결 후 `stage1` 다시 실행 (이미 받은 답은 건너뜀) |
 | `순위를 읽지 못한 평가` | 평가 마지막 줄에 `FINAL RANKING:`이 없음. Claude에게 "그 평가만 다시 받아줘" (`stage2 --force`는 모든 자동 평가를 다시 받음) |
 | 브라우저 보조가 멈춤 | 로그인·CAPTCHA·동의 화면 → 직접 처리 후 "계속"이라고 말하기. 확장 연결은 `/chrome`에서 확인 |
@@ -183,4 +206,5 @@ python council/scripts/council.py check
 - Claude Code Skills — https://code.claude.com/docs/en/skills
 - Codex Auth — https://developers.openai.com/codex/auth
 - 중첩 세션 이슈 — https://claudeissues.com/issue/26190-nested-claude-p-instances-hang-when-claudecode-env-var-is-inherited
-- 🧪 직접 확인: `gemini --help`(0.63.0), `codex exec --help`(codex-cli 0.161.0), `python council/scripts/council.py check`, 테스트 `python -m unittest discover -s council/tests` (7개 통과)
+- Panickssery et al. 2024 — https://arxiv.org/abs/2404.13076 , karpathy/llm-council — https://github.com/karpathy/llm-council
+- 🧪 직접 확인: `gemini --help`(0.63.0), `codex exec --help`(codex-cli 0.161.0), `council.py check --ping`(로그인 전 실패 메시지), 테스트 `python -m unittest discover -s council/tests` (9개 통과)

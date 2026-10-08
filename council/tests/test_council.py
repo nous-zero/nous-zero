@@ -141,6 +141,22 @@ class PipelineTest(unittest.TestCase):
         self.assertIn("최종 결론: 테스트", log)
         self.assertIn("| Response A |", log)
 
+    def test_check_ping_calls_enabled_free_members(self):
+        code, out = self.run_cli("check", "--ping")
+        self.assertEqual(code, 0)
+        self.assertIn("✓ fake-a: 성공", out)
+        self.assertIn("paid-one: 유료 위원이라 건너뜀", out)
+        self.assertNotIn("claude: 성공", out)
+
+    def test_check_ping_reports_missing_command(self):
+        config = json.loads((self.tmp / "members.json").read_text(encoding="utf-8"))
+        config["members"].append({"id": "ghost", "label": "ghost", "type": "command",
+                                  "command": ["no-such-council-cli"], "enabled": True})
+        (self.tmp / "members.json").write_text(json.dumps(config), encoding="utf-8")
+        code, out = self.run_cli("check", "--ping")
+        self.assertEqual(code, 1)
+        self.assertIn("! ghost: 실패", out)
+
     def test_stage2_needs_two_answers(self):
         _, out = self.run_cli("new", "응답 부족")
         run = Path(out.strip().splitlines()[-1])
