@@ -23,7 +23,7 @@
 | **Meta 공식 Llama API** | ⚠️ 불명확 | 2025-04 LlamaCon에서 **제한적 프리뷰**로 공개, 가격 미공개 ([TechCrunch](https://techcrunch.com/2025/04/29/meta-previews-an-api-for-its-llama-ai-models/)). 2026년 현재 공식 단가 확인 불가 ([Gate.AI](https://gate.ai/blog/llama-3-1-405b-instruct-specs-pricing-api-access-use-cases)), 서비스 종료 주장도 있으나 미확인 ([Spheron](https://www.spheron.network/blog/meta-shut-down-the-llama-api-self-hosting-llama-is-now-offic/)) | 현재로선 비추천 |
 | **Meta Model API (Muse Spark, 2026-10-08 추가 조사)** | 유료 + 신규 크레딧 | Meta Superintelligence Labs의 **비공개(closed) 모델 Muse Spark**를 제공하는 공식 개발자 API. 2026-07-09 공개 프리뷰 출시, **신규 계정당 $20 무료 크레딧**, OpenAI 호환 방식 — 단 **미국 개발자 대상**으로 보도됨 ⚠️ ([AIChatDaily](https://www.aichatdaily.com/ai-models/meta-opens-muse-spark-1-1-developers-via), [FourWeekMBA](https://fourweekmba.com/ai-meta-muse-spark-1-1-meta-model-api-closed-pivot/)). Muse Spark 1.3(2026-09) 표준 단가 입력 $1.25 / 출력 $4.25, Meta가 트래픽을 학습에 쓰도록 허용하는 저가 엔드포인트도 있음 ⚠️ ([eesel](https://www.eesel.ai/blog/muse-spark-1-3-pricing)) | 🔎 Meta의 **최신 관점**을 넣으려면 이 경로. 한국에서 가입 가능한지 먼저 확인 필요 |
 | **Meta AI 앱(소비자용)** | 무료 | API로 제공되지 않음 ([Metronome pricing index](https://metronome.com/pricing-index/meta-ai)) | 자동 연결 불가. 브라우저 자동화는 약관 리스크 |
-| **Groq (Llama 호스팅)** | 무료 등급 | Llama 3.3 70B 무료 한도 약 1,000회/일·30회/분, Llama 3.1 8B 약 14,400회/일 (출처 간 불일치 ⚠️). 한도는 API 키별이 아니라 **계정(조직) 단위** ([eesel](https://eesel.ai/blog/groq-pricing), [OpenRouter 블로그](https://openrouter.ai/blog/tutorials/free-llm-apis-compared/), [LocalAIMaster](https://localaimaster.com/blog/groq-api-free-guide)) | **추천**: 빠르고 무료 |
+| **Groq (Llama 호스팅)** | 무료 등급 | Llama 3.3 70B 무료 한도 약 1,000회/일·30회/분, Llama 3.1 8B 약 14,400회/일 (출처 간 불일치 ⚠️). 한도는 API 키별이 아니라 **계정(조직) 단위** ([eesel](https://eesel.ai/blog/groq-pricing), [OpenRouter 블로그](https://openrouter.ai/blog/tutorials/free-llm-apis-compared/), [LocalAIMaster](https://localaimaster.com/blog/groq-api-free-guide)) | ❌ **정정(2026-10-08)**: Groq는 2026-08-16 무료·개발자 등급에서 `llama-3.3-70b-versatile`·`llama-3.1-8b-instant`를, 2026-07-17 `llama-4-scout`를 종료. 대체 권장 모델은 `openai/gpt-oss-120b`·`qwen/qwen3.6-27b` ([Groq Deprecations](https://console.groq.com/docs/deprecations), [ECorpIT](https://ecorpit.com/groq-llama-3-3-70b-shutdown-qwen3-6-27b-preview-replacement-2026/)) |
 | **OpenRouter** | 무료/유료 | Meta 모델 제공 ([OpenRouter setup guide](https://cdn.jsdelivr.net/npm/@saibolla/ada@0.1.3/skills/perplexity-search/references/openrouter_setup.md)). `:free` Llama 모델 ID는 시기별로 달라 미확인 ⚠️ ([aitoolsradar](https://aitoolsradar.org/blog/guides/openrouter-free-models-2026/)) | 관문 통일용 |
 | **로컬 Ollama** | $0 | 8B급 4bit ≈ 5~6GB 메모리 ([Eastondev](https://eastondev.com/blog/en/posts/ai/20260528-ollama-hardware-guide/)) | 현재 PC에선 느림 → 보조 위원만 (01 문서 2.4) |
 
@@ -75,7 +75,7 @@
 | OpenAI | Codex CLI (`codex exec`) | ✅ | ✅ (Free 플랜 포함, 한도 미확인) | [OpenAI Help](https://help.openai.com/en/articles/11369540-codex-usage-limits) |
 | xAI | Grok Build CLI (`grok -p`) | ✅ | ❌ (유료 구독 필요, 등급 ⚠️) | [The Decoder](https://the-decoder.com/x-ai-plays-catch-up-with-grok-build-its-first-terminal-based-coding-agent/) |
 | Perplexity | pplx CLI | ⚠️ 미확인 (API 기반 추정) | ❌ (무료 API 없음) | [窓の杜](https://forest.watch.impress.co.jp/docs/news/2128588.html), [Apideck](https://radar.apideck.com/blog/how-to-get-your-perplexity-api-key) |
-| Meta | 계정 로그인 CLI **찾지 못함**. API는 Meta Model API(Muse Spark) | ❌ (API 키 방식) | 신규 $20 크레딧(미국 개발자 대상 보도 ⚠️). 공개 가중치 Llama는 Groq 무료·로컬 | 1.1 참고 |
+| Meta | 계정 로그인 CLI **찾지 못함**. API는 Meta Model API(Muse Spark) | ❌ (API 키 방식) | 신규 $20 크레딧(미국 개발자 대상 보도 ⚠️). 공개 가중치 Llama는 로컬 Ollama (Groq 무료 Llama는 2026-08 종료) | 1.1 참고 |
 
 - 🔎 **[Claude 추론]** "계정만으로 연결"은 회사가 **구독 계정으로 로그인하는 공식 CLI**를 제공할 때만 가능합니다. Google·OpenAI는 무료 계정까지 열어 두었고, xAI는 유료 구독자에게만, Perplexity는 구독과 API를 분리해 과금합니다.
 - 🔎 **비용 비교**: Grok을 Council 용도로만 쓴다면 SuperGrok(약 $30/월)보다 **API 종량제(회의 1회 약 $0.02)** 가 훨씬 저렴합니다. 다른 용도로도 Grok을 많이 쓴다면 구독 + Grok Build CLI가 나을 수 있습니다.
@@ -92,7 +92,7 @@
   1. Colab 무료는 터널링으로 외부에 서버를 여는 방식이 약관 금지 항목에 걸릴 가능성이 높고,
   2. 두 서비스 모두 세션이 12시간 안팎에서 끊기고 GPU 배정도 보장되지 않아 **매일 자동 루틴에 부적합**합니다.
 - 🔎 **권장 역할 분담**
-  - **Council의 Llama 위원** → Groq 무료 API (설치·서버 불필요, 70B급 사용 가능, 1.1 참고)
+  - **Council의 Meta 위원** → ~~Groq 무료 API~~ (2026-08-16 Llama 종료, 1.1 참고) → **브라우저 수동(meta.ai)** 또는 로컬 Ollama
   - **Colab·Kaggle** → 노트북 안에서 끝나는 **실험·학습용**: ① 쌓인 Council 로그로 "위원 불일치 vs 성과" 분석 ② 오픈모델 파인튜닝·선호 학습(DPO 등) 실습 ③ 로컬에 못 올리는 14B~32B 모델의 품질 비교 벤치마크. 이는 AIGEN(GDPO·SFT) 경험·AIFFEL 과정과도 직결됩니다.
 
 ---
@@ -115,7 +115,7 @@
 | 의장 | **Claude** (Claude Code) | Claude Max | 종합·루브릭 채점 | 매 회의 |
 | 핵심 | **Gemini** | Gemini CLI (Google AI Pro) | 전략 위원 | 매 회의 |
 | 핵심 | **GPT** | Codex CLI(무료 계정) → 부족하면 OpenRouter/OpenAI API | 전략 위원 | 매 회의 |
-| 핵심 | **Llama (Meta)** | Groq 무료 → 대안 OpenRouter | **반론자(Devil's Advocate)**·오픈모델 관점 | 매 회의 |
+| 핵심 | **Meta** | ~~Groq 무료~~ → meta.ai 브라우저 수동(5.1) | **반론자(Devil's Advocate)**·오픈모델 관점 | 매 회의 |
 | 전문 | **Perplexity** | OpenRouter 또는 Sonar API | **팩트체커** — 회의 전 Fact Sheet의 최신 웹 근거·출처 수집 | 데이터 수집 단계 |
 | 전문 | **Grok** | xAI API (X 검색 필요 시) / OpenRouter | **트렌드 스카우트** — X(트위터) 실시간 반응·밈 탐지 | 매일 트렌드 루틴 |
 | 예비 | DeepSeek·Qwen 등 | OpenRouter `:free` | 위원 결석(한도 초과·모델 중단) 시 대체 | 필요 시 |
@@ -148,7 +148,7 @@ flowchart LR
 |---|---|---|
 | Gemini | Gemini CLI (구독) | $0 |
 | GPT | Codex CLI 무료 → (대체) GPT-5.4-mini API | $0 → 약 $0.02 |
-| Llama | Groq 무료 | $0 |
+| Meta | meta.ai 브라우저 수동 | $0 |
 | Perplexity (자료 수집 1회) | Sonar | 약 $0.005 |
 | Grok (자료 수집 1회, 입력 5K/출력 1K 가정) | Grok 4.7 | 약 $0.016 + X 검색 수수료 |
 | **합계** |  | **약 $0.02 ~ $0.05 / 회의** |
@@ -170,15 +170,26 @@ flowchart LR
 
 ## 5. 연결 순서 제안 (🔎 Claude 추론)
 
-> **Phase A는 $0으로 시작 가능** (2026-10-08 질의응답 반영): OpenRouter $10 충전과 Perplexity 구독은 **필수가 아닙니다.** 1~2번(GPT·Meta)만으로 Claude·Gemini·GPT·Llama 4개 회사 모델의 Council이 구성됩니다. OpenRouter 무료 모델도 충전 없이 하루 50회까지 사용 가능합니다 ([OpenRouter Limits](https://openrouter.ai/docs/api-reference/limits)). Perplexity·Grok은 유료라 3~4번 단계로 미루고, 그 사이 웹 근거 수집은 Gemini CLI의 내장 웹 검색 도구 `google_web_search`로 대신할 수 있습니다 ([Gemini CLI Tools](https://geminicli.com/docs/tools)).
+> **Phase A는 $0으로 시작 가능** (2026-10-08 질의응답 반영): OpenRouter $10 충전과 Perplexity 구독은 **필수가 아닙니다.** Claude·Gemini·GPT에 브라우저 수동 위원(Meta AI·Perplexity·Grok)을 더해 6개 회사 모델의 Council이 구성됩니다(5.1). OpenRouter 무료 모델도 충전 없이 하루 50회까지 사용 가능합니다 ([OpenRouter Limits](https://openrouter.ai/docs/api-reference/limits)). Perplexity·Grok은 유료라 3~4번 단계로 미루고, 그 사이 웹 근거 수집은 Gemini CLI의 내장 웹 검색 도구 `google_web_search`로 대신할 수 있습니다 ([Gemini CLI Tools](https://geminicli.com/docs/tools)).
 
 | 순서 | 작업 | 비용 |
 |---|---|---|
 | 1 | Codex CLI 설치 → ChatGPT 무료 계정 로그인 → `codex exec` 동작·한도 확인 (**GPT**) | $0 |
-| 2 | Groq 계정·API 키 발급 → Llama 3.3 70B 호출 테스트 (**Meta**) | $0 |
+| 2 | ~~Groq Llama~~ (종료) → meta.ai·perplexity.ai·grok.com 무료 계정으로 브라우저 수동 참여 (**Meta·Perplexity·Grok**) | $0 |
 | 3 | OpenRouter 가입 → **$10 1회 충전** → Perplexity Sonar·Grok 호출 테스트 (**Perplexity·Grok**) + 무료 모델 1,000회/일 확보 | $10 |
 | 4 | (선택) X 실시간 트렌드가 중요하면 xAI API 직접 연결해 `x_search` 테스트 | 사용량 비례 |
 | 5 | (선택) Perplexity를 OpenRouter 대신 직접 연결하려면 Perplexity API 크레딧만 구매 (구독 불필요) | 사용량 비례 |
+
+
+### 5.1 브라우저 위원: Meta AI·Perplexity·Grok (2026-10-08 질의응답 반영)
+
+| 방식 | 가능 여부 | 근거 |
+|---|---|---|
+| **사람이 직접 붙여넣기** (프롬프트를 복사해 meta.ai·perplexity.ai·grok.com에 넣고, 답을 복사해 저장) | ✅ **Phase A 채택** — 무료 계정으로 $0 | 🔎 [Claude 추론] 사람이 평소처럼 쓰는 것이라 자동화 금지 조항과 무관 |
+| **브라우저 자동 조작** (Claude in Chrome 등이 대신 입력·복사) | ⚠️ 비추천 | Meta 약관: 허가 없는 자동 데이터 수집 금지, 로그인 상태도 예외 아님 ([ConductAtlas: Meta ToS](https://conductatlas.com/platform/meta/meta-terms-of-service/provision/CA-P-017687/no-automated-data-collection-without-permission/), [Social Media Today](https://www.socialmediatoday.com/news/metas-updating-terms-service-with-clarified-wording-around-misuse/732577/)). Perplexity 약관: 로봇·스크레이퍼 등 자동 프로세스로 데이터를 추출하는 것 제한 ([ConductAtlas: Perplexity ToS](https://conductatlas.com/platform/perplexity-ai/perplexity-terms-of-service/provision/CA-P-049606/prohibition-on-scraping-or-automated-data-extraction/), 원문: [Perplexity Legal Hub](https://hub-prod.perplexity.ai/hub/legal/terms-of-service)). 🔎 사용자 대신 움직이는 브라우저 에이전트가 여기에 해당하는지는 불분명하지만 계정 제재 위험이 있음 |
+
+- 🔎 **[Claude 추론] 운영 방식**: 복사·붙여넣기 부담을 줄이려고 브라우저 위원은 **Stage 1(독립 의견)에만** 참여하고, 상호평가(Stage 2)는 CLI 위원과 Claude가 맡습니다. 사용자가 바쁜 날은 브라우저 위원을 건너뛰고 회의할 수 있습니다.
+- 구현: `council/members.json`의 `meta-ai`, `perplexity`, `grok-web` (type `manual`, stages `[1]`)
 
 ---
 
@@ -197,6 +208,9 @@ flowchart LR
 - Spheron (Llama API 종료 주장) — https://www.spheron.network/blog/meta-shut-down-the-llama-api-self-hosting-llama-is-now-offic/
 - Metronome (Meta AI) — https://metronome.com/pricing-index/meta-ai
 - Groq 무료 등급 — https://eesel.ai/blog/groq-pricing , https://localaimaster.com/blog/groq-api-free-guide
+- Groq 모델 종료 — https://console.groq.com/docs/deprecations , https://ecorpit.com/groq-llama-3-3-70b-shutdown-qwen3-6-27b-preview-replacement-2026/
+- Meta 약관(자동 수집) — https://conductatlas.com/platform/meta/meta-terms-of-service/provision/CA-P-017687/no-automated-data-collection-without-permission/ , https://www.socialmediatoday.com/news/metas-updating-terms-service-with-clarified-wording-around-misuse/732577/
+- Perplexity 약관 — https://hub-prod.perplexity.ai/hub/legal/terms-of-service , https://conductatlas.com/platform/perplexity-ai/perplexity-terms-of-service/provision/CA-P-049606/prohibition-on-scraping-or-automated-data-extraction/
 - xAI 가격 — https://www.morphllm.com/grok-api-pricing , https://costbench.com/software/llm-api-providers/xai-api/
 - xAI 도구 — https://docs.x.ai/docs/tools/overview , https://releases.sh/release/rel_riWxs8I6mz0rrI_3ovwp0-ai-sdk-xai-v3-0-93-deprecates-searchparameters-for-agent-tools
 - X 검색 과금 변경 — https://runtimewire.com/article/xai-is-changing-the-economics-of-x-search-runtimewire-was-built-for-a-narrower-r
