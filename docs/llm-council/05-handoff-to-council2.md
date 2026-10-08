@@ -59,3 +59,34 @@
 | 3안 Antigravity CLI(`agy`) | `agy -p` 멈춤이 v1.2.0(9/11)·v1.2.3(9/15)에도 재현 보고, 이슈는 9/3에 닫혔지만 닫힘 ≠ 해결 | [antigravity-cli #318](https://github.com/google-antigravity/antigravity-cli/issues/318) |
 | Perplexity Pro 구독(API $5 크레딧용) | API는 구독과 별도 결제, $5 혜택 중단 보고도 있음 → 구독 불필요 | 02 문서 1.3 |
 | 유료 위원(Grok API·Perplexity API·OpenRouter $10·Meta Model API) | D14 보류 | — |
+
+---
+
+## ② 대표님 요구·선호·금지 (문서에 아직 없는 것)
+
+### 2-1. 대표님이 Claude 설정에 둔 상시 선호 (모든 답변에 적용)
+1. «근거(출처) 없는 답변 금지.»
+2. «클로드의 추론 일 경우 추론이라고 반드시 명시.»
+3. «새로운 ai 트랜드 용어가 나올 경우 용어의 어원, 6하원칙에 입각한 설명, 박정훈이 어떻게 활용 하면 더 좋은 시너지를 낼 수 있을지 분석해서 설명하는 .md를 만들어 주시고 C:\Users\745ra\OneDrive\바탕 화면\Ai 용어 트랜드폴더에 저장하여 주세요.»
+   - 클라우드 세션은 PC 폴더에 저장할 수 없어 저장소 `ai-terms/`에 만들었습니다: `ai-terms/LLM-Council.md`, `ai-terms/Llama.md`.
+   - **Council 2 할 일**: 두 파일을 위 Windows 폴더로 복사 (로컬 세션은 직접 저장 가능). 앞으로 새 용어는 그 폴더에 바로 저장.
+
+### 2-2. 일하는 방식에 대한 선호 (대화에서 드러난 것)
+- **인터뷰식 확인을 선호**: 선택지 질문으로 결정하고, 모르는 부분은 «더 자세한 인터뷰가 필요합니다»라고 답함. 결정 전 장단점·근거를 먼저 원함.
+- **실측 우선**: Council 2 보고서처럼 «[미실측]»·«[미확인]»을 구분하는 것을 기대함. "로그인하면 된다"처럼 시험 안 한 주장을 사실처럼 쓰면 안 됨 (Gemini 건에서 Council 1이 틀림).
+- **자동화 지향**: «수동 조작을 하지 않을 뿐이죠» — 사람이 붙여넣는 단계보다 자동 보조를 원함. 단, 대표님이 **지켜보는 상태**가 전제(D17).
+- **이해 확인 질문을 자주 함**: "이유가 있나요?", "이상 없나요?" → 이유가 없으면 "특별한 이유 없음"이라고 솔직히 답하고, 점검 결과를 표로 보여주는 방식이 잘 받아들여졌음.
+- 답변·문서는 **한국어**. 쉬운 말로, 사실과 추론을 표시.
+
+### 2-3. 금지·주의
+- **API 키·토큰을 채팅이나 파일에 쓰지 않음.** 키는 대표님이 Windows 환경변수에 직접 등록 (SKILL.md 규칙 8).
+- **사이트 탐지 회피·흔적 숨기기 기능은 만들지 않음** (①의 버린 것 참고). 브라우저 보조는 대표님이 보는 앞에서만, 로그인·CAPTCHA·동의 화면은 대표님에게 넘김.
+- **유료 위원은 대표님 요청 전까지 실행 금지** (D14). OpenRouter 충전, xAI 데이터 공유 크레딧(학습 동의, 되돌릴 수 없다는 보고), Perplexity·Grok API 모두 포함.
+- **기존(부진) 채널 분석은 요청 시에만** (D12).
+- **PR 생성은 요청받지 않음** — 아직 main에 합치는 PR을 만들지 않았음.
+
+### 2-4. 대표님 배경 (README 기준, 분석·제안에 활용)
+- 24년 B2B 기술 영업(Intel·ASUS·CJ) → AI 엔지니어 전환 중, ACL 2025 Biomedical Co-Scientist Agent 공동 제1저자, AIGEN 3B Biomedical Agent(GDPO·SFT·Uncertainty Head), AIFFEL 15기, KAIST AIP 3기.
+- 매일 루틴: LeetCode Easy 1문제, GDPO.py 50줄 한국어 주석, GitHub 커밋 (README "Daily Learning Routine").
+- PC: AMD Ryzen 7 8700G + Radeon 780M(내장), RAM 32GB, Windows 11 Home.
+- 계정: Claude Max(유료), Google AI Pro(유료, 단 Gemini CLI에는 소용없음), ChatGPT·meta.ai·perplexity.ai·grok.com은 무료 계정.
