@@ -182,6 +182,7 @@ class PipelineTest(unittest.TestCase):
              "command": [sys.executable, str(slow)], "enabled": True}
             for i in range(3)
         ]
+        config["settings"]["chair_rotation"] = ["slow-0"]
         (self.tmp / "members.json").write_text(json.dumps(config), encoding="utf-8")
         _, out = self.run_cli("new", "병렬")
         run = Path(out.strip().splitlines()[-1])
@@ -220,3 +221,101 @@ class PipelineTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OpenAICompatibleTest(unittest.TestCase):
+    """API members (e.g. Gemini via its OpenAI-compatible endpoint) against a local fake server."""
+
+    def setUp(self):
+        import http.server
+        import os
+        import threading
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *args):
+                pass
+
+            def reply(self, code, payload):
+                body = json.dumps(payload).encode("utf-8")
+                self.send_response(code)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def do_GET(self):
+                if self.path == "/v1/models":
+                    self.reply(200, {"data": [{"id": "models/gemini-x-flash"}, {"id": "models/gemini-x-pro"}]})
+                else:
+                    self.reply(404, {})
+
+            def do_POST(self):
+                length = int(self.headers.get("Content-Length", 0))
+                self.rfile.read(length)
+                if self.headers.get("Authorization") != "Bearer test-key":
+                    self.reply(401, {"error": "bad key"})
+                else:
+                    self.reply(200, {"choices": [{"message": {"content": "OK"}}]})
+
+        self.server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+        self.saved_env = dict(os.environ)
+        os.environ.update({"TEST_GEM_KEY": "test-key", "NO_PROXY": "127.0.0.1,localhost", "no_proxy": "127.0.0.1,localhost"})
+
+        self.tmp = Path(tempfile.mkdtemp())
+        for name in ("prompts", "rubrics"):
+            shutil.copytree(COUNCIL_DIR / name, self.tmp / name)
+        self.write_config("gemini-x-flash")
+
+    def write_config(self, model):
+        config = {
+            "settings": {"chair_rotation": ["gem"], "min_responses": 2},
+            "members": [{
+                "id": "gem", "label": "Gem", "type": "openai_compatible", "enabled": True,
+                "base_url": f"http://127.0.0.1:{self.server.server_port}/v1",
+                "model": model, "api_key_env": "TEST_GEM_KEY", "timeout": 10,
+            }],
+        }
+        (self.tmp / "members.json").write_text(json.dumps(config), encoding="utf-8")
+
+    def tearDown(self):
+        import os
+        self.server.shutdown()
+        os.environ.clear()
+        os.environ.update(self.saved_env)
+        shutil.rmtree(self.tmp)
+
+    def run_cli(self, *args):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            code = council.main(["--council-dir", str(self.tmp), *args])
+        return code, out.getvalue()
+
+    def test_ping_sends_bearer_key(self):
+        code, out = self.run_cli("check", "--ping")
+        self.assertEqual(code, 0, out)
+        self.assertIn("✓ gem: 성공", out)
+        self.assertIn("의장: gem — 설정 확인됨", out)
+
+    def test_ping_reports_missing_key(self):
+        import os
+        del os.environ["TEST_GEM_KEY"]
+        code, out = self.run_cli("check", "--ping")
+        self.assertEqual(code, 1)
+        self.assertIn("환경변수 TEST_GEM_KEY", out)
+
+    def test_models_lists_bare_ids_with_filter(self):
+        code, out = self.run_cli("models", "gem", "--filter", "flash")
+        self.assertEqual(code, 0, out)
+        self.assertIn("gemini-x-flash", out)
+        self.assertNotIn("models/", out)
+        self.assertNotIn("gemini-x-pro", out)
+
+    def test_new_is_held_until_chair_is_ready(self):
+        self.write_config("CHANGE_ME")
+        code, out = self.run_cli("new", "보류 시험")
+        self.assertEqual(code, 1)
+        self.assertIn("회의 보류", out)
+        self.assertFalse((self.tmp / "runs").exists())
+        code, _ = self.run_cli("new", "보류 시험", "--ignore-chair")
+        self.assertEqual(code, 0)

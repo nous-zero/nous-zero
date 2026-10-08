@@ -30,15 +30,26 @@ node -v          # Node.js가 없으면 https://nodejs.org 에서 LTS 설치
 python --version # 3.10 이상. 없으면 https://www.python.org/downloads/
 ```
 
-### 1.2 위원 CLI 설치와 로그인
+### 1.2 위원 연결: Codex 로그인 + Gemini API 키
 ```powershell
-npm install -g @google/gemini-cli @openai/codex
-gemini           # 처음 실행 시 "Login with Google" 선택 → Google AI Pro 계정 로그인 → /quit 으로 종료
+npm install -g @openai/codex
 codex login      # 브라우저가 열리면 ChatGPT 계정으로 로그인
 ```
-- 🧪 2026-10-08 기준 설치된 버전: Gemini CLI `0.63.0`, Codex CLI `0.161.0`.
-- 🧪 Gemini CLI는 로그인 전에 실행하면 `Please set an Auth method ...` 메시지를 냅니다. 이 메시지가 나오면 `gemini`를 한 번 실행해 로그인하면 됩니다.
-- Codex 로그인 방식: [Codex Auth](https://developers.openai.com/codex/auth)
+- 🧪 2026-10-08 기준 Codex CLI `0.161.0`. 로그인 방식: [Codex Auth](https://developers.openai.com/codex/auth)
+- ✅ PC 실측(다른 세션 보고): `check --ping`에서 `✓ codex: 성공 (7.6초)`.
+
+**Gemini (API 키 방식)** — ⚠️ **정정(2026-10-08)**: 이전 판에서 "Gemini CLI에 Google 로그인"을 안내했으나, 2026-06-18부터 개인 계정의 Gemini CLI가 중단되어 PC에서 `IneligibleTierError: This client is no longer supported for Gemini Code Assist for individuals`로 거절되었습니다. 제가 종료 공지를 확인하지 않고 쓴 오류입니다.
+
+1. [Google AI Studio](https://aistudio.google.com)에 Google 계정으로 로그인해 **API 키**를 만듭니다 ([Gemini API 키 문서](https://ai.google.dev/gemini-api/docs/api-key)).
+2. 키를 Windows 환경변수 `GEMINI_API_KEY`에 넣습니다: Windows 검색에서 "계정의 환경 변수 편집" → 새로 만들기 → 이름 `GEMINI_API_KEY`, 값에 키. (명령어로 넣으면 PowerShell 기록에 남으므로 이 화면을 권장. **키를 Claude Code 채팅에 붙여넣지 마세요.**)
+3. PowerShell과 Claude Code를 **새로 엽니다** (환경변수는 새로 연 창부터 적용).
+4. 쓸 수 있는 모델 확인: `python council/scripts/council.py models gemini --filter flash`
+5. 목록에서 Flash 모델 ID 하나를 골라 `council/members.json`의 `gemini` → `model`에 적습니다 (또는 Claude Code에 "members.json의 gemini 모델을 <ID>로 바꿔줘").
+6. `python council/scripts/council.py check --ping` → `✓ gemini: 성공`과 `의장: gemini — 설정 확인됨`이 나오면 회의를 열 수 있습니다.
+
+- 2026-06-18부터 무료·Google AI Pro·Ultra 개인 계정의 Gemini CLI 사용이 중단되었고, API 키 인증은 영향이 없습니다 ([Gemini CLI 공식 공지 #28017](https://github.com/google-gemini/gemini-cli/discussions/28017)). 그래서 Gemini는 CLI 대신 **API 키로 스크립트가 직접** 부릅니다 ([Gemini OpenAI 호환 문서](https://ai.google.dev/gemini-api/docs/openai)).
+- 무료 등급은 Flash 계열 위주이고, 무료 등급 입력은 구글 제품 개선에 쓰일 수 있습니다 ⚠️ 출처 간 세부 차이 있음 ([Klymentiev](https://klymentiev.com/blog/gemini-api-free-tier), [GeoToolbox](https://geotoolbox.ai/blog/gemini-api-pricing)). 자료표에 비공개 정보를 넣지 마세요.
+- **의장(gemini)이 준비되기 전에는 `new`가 회의를 시작하지 않습니다(회의 보류, 사용자 결정).**
 
 ### 1.3 저장소 받기
 Council 파일은 현재 브랜치 `claude/llm-concile-usage-interview-pnttr8`에 있습니다.
@@ -56,7 +67,7 @@ python council/scripts/council.py check
 정상이라면 다음처럼 보입니다 (🧪 이 환경의 출력 형식):
 ```
 - claude           [사용] subagent           Claude Code 서브에이전트가 응답을 채움
-- gemini           [사용] command            명령 gemini: 있음 (...)
+- gemini           [사용] openai_compatible  환경변수 GEMINI_API_KEY: 설정됨
 - codex            [사용] command            명령 codex: 있음 (...)
 - meta-ai          [사용] manual             사용자가 브라우저 답변을 붙여넣음
 - perplexity       [사용] manual             ...
@@ -74,7 +85,7 @@ python council/scripts/council.py check
 python council/scripts/council.py check --ping
 ```
 - 켜져 있는 자동 위원(Gemini·Codex)에게 `Reply with exactly one word: OK`를 보내고 위원별 성공·실패와 걸린 시간을 보여줍니다. 위원마다 최대 180초 기다립니다(`--ping-timeout`으로 조절).
-- 🧪 성공하면 `✓ gemini: 성공 (… 초) - OK`처럼, 실패하면 `! codex: 실패 … - <오류>`처럼 나옵니다. 로그인 전 Gemini는 `종료 코드 41: Please set an Auth method ...`를 냈습니다.
+- 성공하면 `✓ gemini: 성공 (… 초) - OK`처럼, 실패하면 `! gemini: 실패 … - <오류>`처럼 나옵니다. 마지막 줄의 `의장: gemini — 설정 확인됨`을 꼭 확인하세요.
 - 둘 다 성공하면 **연습 회의**를 한 번 엽니다. 가벼운 안건으로 전체 흐름을 확인하는 용도입니다.
   ```
   /llm-council 연습: 아침 루틴에서 LeetCode와 GDPO 주석 중 무엇을 먼저 할까
@@ -135,7 +146,7 @@ python council/scripts/council.py check --ping
 
 ### 4.1 의장: Gemini 고정 (2026-10-08 사용자 결정)
 
-- 의장은 항상 Gemini입니다(`council/members.json`의 `settings.chair_rotation: ["gemini"]`). Gemini CLI로 자동 실행되므로 의장 단계에서 내가 할 일은 없습니다.
+- 의장은 항상 Gemini입니다(`council/members.json`의 `settings.chair_rotation: ["gemini"]`). 스크립트가 Gemini API(키 방식)로 자동 실행하므로 의장 단계에서 내가 할 일은 없습니다. **Gemini가 연결되기 전에는 회의를 열지 않습니다(회의 보류, 사용자 결정)** — `new`가 의장 준비를 확인하고 막습니다.
 - 원본 llm-council의 기본 의장도 Gemini 3 Pro입니다 ([karpathy/llm-council](https://github.com/karpathy/llm-council)).
 - 의장 호출이 실패하면 Claude가 다른 위원으로 바꾸지 않고 오류를 보고한 뒤 다시 시도합니다. 한 회의만 바꾸고 싶으면 "이번 회의 의장은 claude로"라고 말합니다.
 - 참고: LLM 평가자는 자기가 쓴 글을 알아보고 더 높게 평가하는 경향이 있습니다 ([Panickssery et al., NeurIPS 2024](https://arxiv.org/abs/2404.13076)). Gemini도 위원으로 답을 내므로, 🔎 [Claude 추론] 익명화·채점 기준·소수 의견 기록이 이 영향을 줄이는 장치입니다. 기록이 쌓이면 Gemini 답변(익명 해제 표로 확인)이 최종 결론에 지나치게 자주 채택되는지 점검해 볼 수 있습니다.
@@ -184,8 +195,10 @@ python council/scripts/council.py check --ping
 
 | 증상 | 원인과 해결 |
 |---|---|
-| `check`에서 `명령 gemini: 없음` | Node.js 설치 후 새 PowerShell 창에서 `npm install -g @google/gemini-cli` 다시 실행 |
-| Gemini 실패: `Please set an Auth method ...` | 🧪 로그인 전 상태의 메시지. `gemini` 실행 → Google 로그인 |
+| `의장: gemini — 준비 안 됨 (...) → 회의 보류` | 1.2의 Gemini API 키 절차를 마치지 않은 상태. 괄호 안 이유(환경변수 없음 / model 값 미정)를 해결 |
+| Gemini 실패: `HTTP 400`·`404` | `model` ID가 틀림. `models gemini --filter flash`로 다시 확인 |
+| Gemini 실패: `HTTP 429` | 무료 등급 한도 초과. 잠시 후 다시 시도 (한도는 AI Studio에서 확인) |
+| Gemini CLI에서 `IneligibleTierError` | 2026-06-18 개인 계정 중단 때문 ([공지 #28017](https://github.com/google-gemini/gemini-cli/discussions/28017)). Council은 CLI를 쓰지 않으므로 무시 |
 | Codex 실패 (로그인 관련) | `codex login` 다시 실행 |
 | 위원이 `시간 초과` | 네트워크·로그인 문제로 CLI가 재연결을 반복하는 경우가 있음(🧪 이 작업 환경에서 Codex가 네트워크 차단 때문에 계속 재연결). 먼저 `check --ping`으로 확인하고, 응답이 느린 것뿐이면 `council/members.json`의 `timeout`(초)을 늘림 |
 | `응답이 1개뿐입니다. 최소 2개가 필요합니다` | 실패한 위원 오류는 `council/runs/<회의>/logs/`에 있음. 해결 후 `stage1` 다시 실행 (이미 받은 답은 건너뜀) |
@@ -209,4 +222,4 @@ python council/scripts/council.py check --ping
 - Codex Auth — https://developers.openai.com/codex/auth
 - 중첩 세션 이슈 — https://claudeissues.com/issue/26190-nested-claude-p-instances-hang-when-claudecode-env-var-is-inherited
 - Panickssery et al. 2024 — https://arxiv.org/abs/2404.13076 , karpathy/llm-council — https://github.com/karpathy/llm-council
-- 🧪 직접 확인: `gemini --help`(0.63.0), `codex exec --help`(codex-cli 0.161.0), `council.py check --ping`(로그인 전 실패 메시지), 테스트 `python -m unittest discover -s council/tests` (9개 통과)
+- 🧪 직접 확인: `gemini --help`(0.63.0), `codex exec --help`(codex-cli 0.161.0), `council.py check --ping`(클라우드에서 실패 원인 표시 확인), PC 실측 보고 `✓ codex: 성공 (7.6초)`·`✗ gemini: IneligibleTierError`, 테스트 `python -m unittest discover -s council/tests` (9개 통과)

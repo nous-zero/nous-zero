@@ -59,6 +59,8 @@
 
 ### 2.3 비용·한도 (보유 구독 기준)
 
+> ⚠️ **정정(2026-10-08)**: 아래 'Google AI Pro + Gemini CLI 하루 1,500회'는 낡은 정보입니다. 2026-06-18부터 개인 계정의 Gemini CLI 사용이 중단되었습니다 ([Gemini CLI 공식 공지 #28017](https://github.com/google-gemini/gemini-cli/discussions/28017)). Gemini는 무료 API 키로 연결합니다 ([council/README.md](../../council/README.md)).
+
 | 자원 | 확인된 한도/조건 | 출처 |
 |---|---|---|
 | **Claude Max** | 구독은 **API 사용을 포함하지 않음** (API는 별도 과금). 단, Claude Code의 `claude -p`(headless/print 모드)로 스크립트에서 비대화식 호출 가능 | [Anthropic 도움말](https://support.claude.com/en/articles/9876003-i-have-a-paid-claude-subscription-pro-max-team-or-enterprise-plans-why-do-i-have-to-pay-separately-to-use-the-claude-api-and-console), [Claude Code headless 문서](https://docs.claude.com/en/docs/claude-code/headless) |

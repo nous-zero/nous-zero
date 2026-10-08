@@ -66,7 +66,9 @@
 | DeepSeek·Qwen·GLM·Nemotron 등 | OpenRouter `:free` | 무료 목록은 **수시로 바뀜**. 2026-07 기준 약 23~25개 ([aitoolsradar](https://aitoolsradar.org/blog/guides/openrouter-free-models-2026/), [Buldrr](https://buldrr.com/openrouter-free-models-list-2026-all-27-models-ranked-tested/)). DeepSeek은 더 이상 무료가 아니라는 보고도 있음 ⚠️ |
 | Mistral 등 | 각사 API / OpenRouter | 필요 시 추가 조사 |
 
-### 1.5.1 계정 로그인만으로 연결되는 곳 vs 안 되는 곳 (2026-10-08 질의응답 반영)
+### 1.5.1 계정 로그인만으로 연결되는 곳 vs 안 되는 곳
+
+> ⚠️ **정정(2026-10-08)**: 아래 표의 Google·Gemini CLI 행(무료 계정 하루 1,000회, Google AI Pro 1,500회)은 낡은 정보입니다. 2026-06-18부터 무료·Google AI Pro·Ultra 개인 계정의 Gemini CLI 사용이 중단되었고 API 키 인증만 유지됩니다 ([Gemini CLI 공식 공지 #28017](https://github.com/google-gemini/gemini-cli/discussions/28017)). Council은 Gemini를 API 키로 직접 호출합니다. (2026-10-08 질의응답 반영)
 
 | 회사 | 공식 CLI | 계정 로그인 | 무료 계정으로 가능? | 출처 |
 |---|---|---|---|---|

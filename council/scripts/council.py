@@ -7,7 +7,8 @@ Runs one council meeting in three stages, following karpathy/llm-council:
   3. a chair writes the final synthesis.
 
 Commands:
-  check                     check member commands, API keys and local servers
+  check [--ping]            check member commands, API keys, the chair, and (--ping) real replies
+  models <member>           list model IDs of an API member (e.g. models gemini --filter flash)
   new "<topic>"             create a run folder (question.md, fact-sheet.md)
   stage1 <run> [--prepare]  write prompts and collect independent answers
   stage2 <run> [--prepare]  anonymize answers and collect peer reviews
@@ -195,7 +196,7 @@ def call_command(member: dict, prompt: str) -> str:
     return text
 
 
-def call_openai_compatible(member: dict, prompt: str) -> str:
+def auth_headers(member: dict) -> dict[str, str]:
     headers = {"Content-Type": "application/json"}
     key_env = member.get("api_key_env")
     if key_env:
@@ -203,6 +204,26 @@ def call_openai_compatible(member: dict, prompt: str) -> str:
         if not key:
             raise MemberError(f"환경변수 {key_env} 가 설정되지 않았습니다")
         headers["Authorization"] = f"Bearer {key}"
+    return headers
+
+
+def member_ready(member: dict) -> str | None:
+    """Return why a member cannot be called right now, without any network call."""
+    kind = member.get("type")
+    if not member.get("enabled"):
+        return "꺼져 있음"
+    if kind == "command" and shutil.which(member["command"][0]) is None:
+        return f"명령 {member['command'][0]} 없음"
+    if kind == "openai_compatible":
+        if "CHANGE_ME" in member.get("model", ""):
+            return "model 값이 정해지지 않음"
+        if member.get("api_key_env") and not os.environ.get(member["api_key_env"]):
+            return f"환경변수 {member['api_key_env']} 없음"
+    return None
+
+
+def call_openai_compatible(member: dict, prompt: str) -> str:
+    headers = auth_headers(member)
     body = {"model": member["model"], "messages": [{"role": "user", "content": prompt}]}
     url = member["base_url"].rstrip("/") + "/chat/completions"
     request = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers)
@@ -373,6 +394,10 @@ def cmd_check(council: Council, args) -> int:
         else:
             detail = "사용자가 브라우저 답변을 붙여넣음"
         print(f"- {m['id']:<16} [{state}] {kind:<18} {detail}")
+    chair_ids = council.settings.get("chair_rotation", [])
+    for chair_id in chair_ids:
+        problem = member_ready(council.members[chair_id]) if chair_id in council.members else "members.json에 없음"
+        print(f"\n의장: {chair_id} — " + (f"준비 안 됨 ({problem}) → 회의 보류" if problem else "설정 확인됨"))
     if not getattr(args, "ping", False):
         return 0
     print("\n실제 호출 시험 (--ping): 켜져 있는 자동 위원에게 짧은 질문을 보냅니다")
@@ -395,6 +420,35 @@ def cmd_check(council: Council, args) -> int:
     return 1 if failed else 0
 
 
+def cmd_models(council: Council, args) -> int:
+    member = council.members.get(args.member)
+    if member is None or member.get("type") != "openai_compatible":
+        print(f"{args.member}: API 방식(openai_compatible) 위원이 아닙니다")
+        return 1
+    url = member["base_url"].rstrip("/") + "/models"
+    try:
+        request = urllib.request.Request(url, headers=auth_headers(member))
+        with urllib.request.urlopen(request, timeout=60) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except MemberError as e:
+        print(f"! {e}")
+        return 1
+    except urllib.error.HTTPError as e:
+        print(f"! HTTP {e.code}: {e.read().decode('utf-8', errors='replace')[:500]}")
+        return 1
+    except (urllib.error.URLError, TimeoutError) as e:
+        print(f"! 연결 실패: {e}")
+        return 1
+    ids = sorted({str(item.get("id", "")) for item in data.get("data", [])} - {""})
+    if args.filter:
+        ids = [i for i in ids if args.filter.lower() in i.lower()]
+    for model_id in ids:
+        # Gemini lists "models/<name>"; requests use the bare name.
+        print(model_id.split("/", 1)[1] if model_id.startswith("models/") else model_id)
+    print(f"({len(ids)}개) 고른 ID를 members.json의 {args.member}.model 에 적으세요")
+    return 0
+
+
 def server_up(base_url: str) -> bool:
     try:
         with urllib.request.urlopen(base_url.rstrip("/") + "/models", timeout=3):
@@ -409,6 +463,14 @@ def slugify(text: str) -> str:
 
 
 def cmd_new(council: Council, args) -> int:
+    if not args.ignore_chair:
+        for chair_id in council.settings.get("chair_rotation", []):
+            member = council.members.get(chair_id)
+            problem = member_ready(member) if member else "members.json에 없음"
+            if problem:
+                print(f"의장 {chair_id} 준비 안 됨 ({problem}) → 회의 보류. "
+                      "`check --ping`으로 의장 연결을 먼저 확인하세요.")
+                return 1
     runs_dir = council.dir / "runs"
     runs_dir.mkdir(parents=True, exist_ok=True)
     base = f"{dt.date.today().isoformat()}_{slugify(args.topic)}"
@@ -696,6 +758,10 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("new")
     p.add_argument("topic")
     p.add_argument("--rubric")
+    p.add_argument("--ignore-chair", action="store_true", help="의장 준비 확인 생략 (사용자가 요청할 때만)")
+    p = sub.add_parser("models")
+    p.add_argument("member")
+    p.add_argument("--filter", help="모델 ID에 포함된 글자로 거르기 (예: flash)")
     for name in ("stage1", "stage2", "stage3"):
         p = sub.add_parser(name)
         p.add_argument("run")
@@ -711,7 +777,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     council = Council(args.council_dir.resolve())
     handlers = {
-        "check": cmd_check, "new": cmd_new, "stage1": cmd_stage1, "stage2": cmd_stage2,
+        "check": cmd_check, "new": cmd_new, "models": cmd_models, "stage1": cmd_stage1, "stage2": cmd_stage2,
         "aggregate": cmd_aggregate, "stage3": cmd_stage3, "finalize": cmd_finalize, "status": cmd_status,
     }
     return handlers[args.command](council, args)

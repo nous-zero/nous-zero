@@ -9,7 +9,7 @@
 | id | 위원 | 실행 방식 | 비용 |
 |---|---|---|---|
 | `claude` | Claude | Claude Code 서브에이전트가 답변 | Claude Max 구독 |
-| `gemini` | Gemini | Gemini CLI 자동 호출 | Google AI Pro 구독 (하루 1,500회, [Gemini CLI Quotas](https://geminicli.com/docs/resources/quota-and-pricing/)) |
+| `gemini` | Gemini (의장 고정) | 스크립트가 Gemini API를 직접 호출 (API 키) | 무료 API 키 — Google 로그인 방식 Gemini CLI는 2026-06-18 개인 계정 중단 ([공지 #28017](https://github.com/google-gemini/gemini-cli/discussions/28017)) |
 | `codex` | GPT | Codex CLI 자동 호출 | ChatGPT 무료 계정 ([OpenAI Help](https://help.openai.com/en/articles/11369540-codex-usage-limits), 무료 한도 ⚠️) |
 | `meta-ai` | Meta AI | 브라우저에서 사람이 붙여넣기 (Stage 1만) | 무료 계정 |
 | `perplexity` | Perplexity | 브라우저에서 사람이 붙여넣기 (Stage 1만) | 무료 계정 |
@@ -23,10 +23,23 @@
 ## Windows 설치
 
 1. **Python 3.10+** — [python.org](https://www.python.org/downloads/). 이 도구는 표준 라이브러리만 씁니다.
-2. **Node.js (LTS)** — [nodejs.org](https://nodejs.org/). Gemini CLI와 Codex CLI 설치에 필요합니다.
-3. **Gemini CLI** — `npm install -g @google/gemini-cli` 후 `gemini`를 한 번 실행해 Google 계정으로 로그인 ([Gemini CLI 문서](https://geminicli.com/docs)). 2026-10-08 이 환경에서 0.63.0 설치·도움말 확인.
+2. **Node.js (LTS)** — [nodejs.org](https://nodejs.org/). Codex CLI 설치에 필요합니다.
+3. **Gemini API 키** — 아래 "Gemini 연결" 절차.
 4. **Codex CLI** — `npm install -g @openai/codex` 후 `codex login`으로 ChatGPT 계정 로그인 ([Codex Auth](https://developers.openai.com/codex/auth)). 2026-10-08 이 환경에서 0.161.0 설치·도움말 확인.
-5. 점검: `python council/scripts/council.py check`
+5. 점검: `python council/scripts/council.py check --ping`
+
+### Gemini 연결 (API 키 방식)
+
+1. [Google AI Studio](https://aistudio.google.com)에 Google 계정으로 로그인해 **API 키**를 만듭니다 ([Gemini API 키 문서](https://ai.google.dev/gemini-api/docs/api-key)).
+2. 키를 Windows 환경변수 `GEMINI_API_KEY`에 넣습니다: Windows 검색에서 "계정의 환경 변수 편집" → 새로 만들기 → 이름 `GEMINI_API_KEY`, 값에 키. (명령어로 넣으면 PowerShell 기록에 남으므로 이 화면을 권장. **키를 Claude Code 채팅에 붙여넣지 마세요.**)
+3. PowerShell과 Claude Code를 **새로 엽니다** (환경변수는 새로 연 창부터 적용).
+4. 쓸 수 있는 모델 확인: `python council/scripts/council.py models gemini --filter flash`
+5. 목록에서 Flash 모델 ID 하나를 골라 `council/members.json`의 `gemini` → `model`에 적습니다 (또는 Claude Code에 "members.json의 gemini 모델을 <ID>로 바꿔줘").
+6. `python council/scripts/council.py check --ping` → `✓ gemini: 성공`과 `의장: gemini — 설정 확인됨`이 나오면 회의를 열 수 있습니다.
+
+- 2026-06-18부터 무료·Google AI Pro·Ultra 개인 계정의 Gemini CLI 사용이 중단되었고, API 키 인증은 영향이 없습니다 ([Gemini CLI 공식 공지 #28017](https://github.com/google-gemini/gemini-cli/discussions/28017)). 그래서 Gemini는 CLI 대신 **API 키로 스크립트가 직접** 부릅니다 ([Gemini OpenAI 호환 문서](https://ai.google.dev/gemini-api/docs/openai)).
+- 무료 등급은 Flash 계열 위주이고, 무료 등급 입력은 구글 제품 개선에 쓰일 수 있습니다 ⚠️ 출처 간 세부 차이 있음 ([Klymentiev](https://klymentiev.com/blog/gemini-api-free-tier), [GeoToolbox](https://geotoolbox.ai/blog/gemini-api-pricing)). 자료표에 비공개 정보를 넣지 마세요.
+- **의장(gemini)이 준비되기 전에는 `new`가 회의를 시작하지 않습니다(회의 보류, 사용자 결정).**
 
 ## 사용법
 

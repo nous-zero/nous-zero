@@ -16,7 +16,7 @@
 | ↳ 주의 | 시크릿 창이 아닌 **확장 프로그램이 연결된 일반 프로필**에서 로그인하세요. 로그인 화면이나 CAPTCHA가 나오면 Claude는 멈추고 사용자에게 넘깁니다 | 같은 문서 |
 | ↳ 유지 기간 | 각 사이트가 로그인을 얼마나 유지하는지는 확인하지 못했습니다 ⚠️ | — |
 | **Codex CLI** | `codex login` 후 인증 정보가 `~/.codex/auth.json`에 저장되고, 이후 실행은 저장된 인증을 씁니다 | [Codex 인증 문서](https://developers.openai.com/codex/auth) (auth.json에 접근 토큰 저장), [Non-interactive 문서](https://developers.openai.com/codex/noninteractive) |
-| **Gemini CLI** | 처음 실행 때 Google 로그인을 하면 인증 설정이 사용자 폴더의 `.gemini` 아래에 저장됩니다 | 🧪 로그인 전 실행 시 `~/.gemini/settings.json`에서 인증 방식을 찾는다는 메시지 확인. 토큰 유지 기간은 미확인 ⚠️ |
+| **Gemini** | ⚠️ **정정(2026-10-08)**: Google 로그인 방식 Gemini CLI는 2026-06-18부터 개인 계정 사용이 중단되었습니다 ([공지 #28017](https://github.com/google-gemini/gemini-cli/discussions/28017)). 대신 **API 키를 Windows 환경변수 `GEMINI_API_KEY`에 한 번 넣어 두면** 계속 유지됩니다 | 환경변수는 지우기 전까지 유지 (Windows 기본 동작) |
 
 🔎 **[Claude 추론]** 그래서 아래 1~3단계를 한 번 해 두면 회의 때는 로그인 없이 진행됩니다. 로그인이 풀리면 회의 중 해당 위원만 실패하거나 멈추고, Claude가 알려줍니다.
 
@@ -65,27 +65,34 @@ python -m unittest discover -s council/tests -v
 
 ---
 
-## 4. 위원 CLI 설치와 로그인
+## 4. 위원 연결: Codex 로그인 + Gemini API 키
 
 ```powershell
-npm install -g @google/gemini-cli @openai/codex
+npm install -g @openai/codex
 ```
 설치 후 **PowerShell 창을 새로 열고**:
 ```powershell
-gemini --version
 codex --version
 ```
-**통과 기준**: 버전 숫자가 나옴 (🧪 2026-10-08 기준 Gemini CLI 0.63.0, codex-cli 0.161.0).
+**통과 기준**: 버전 숫자가 나옴 (🧪 2026-10-08 기준 codex-cli 0.161.0).
 
-- `이 시스템에서 스크립트를 실행할 수 없으므로...` 오류가 나면 PowerShell 실행 정책 때문입니다. `gemini.cmd --version`처럼 `.cmd`를 붙여 실행하거나, 실행 정책을 확인하세요 ([Microsoft: about_Execution_Policies](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_execution_policies)). 🔎 [Claude 추론] Council 스크립트는 `.cmd` 파일을 찾아 실행하므로 이 오류와 상관없이 동작할 가능성이 높습니다.
+- `이 시스템에서 스크립트를 실행할 수 없으므로...` 오류가 나면 PowerShell 실행 정책 때문입니다. `codex.cmd --version`처럼 `.cmd`를 붙여 실행하거나, 실행 정책을 확인하세요 ([Microsoft: about_Execution_Policies](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_execution_policies)). 🔎 [Claude 추론] Council 스크립트는 `.cmd` 파일을 찾아 실행하므로 이 오류와 상관없이 동작할 가능성이 높습니다.
 
-로그인:
+Codex 로그인:
 ```powershell
-gemini            # "Login with Google" 선택 → 브라우저에서 Google AI Pro 계정 로그인 → /quit
 codex login       # 브라우저에서 ChatGPT 계정 로그인
 codex login status
 ```
 **통과 기준**: `codex login status`가 로그인 상태를 보여줌 (🧪 `codex login --help`에서 `status: Show login status` 확인).
+
+Gemini API 키 (Google 로그인 방식 Gemini CLI는 쓰지 않습니다):
+1. [Google AI Studio](https://aistudio.google.com)에서 API 키 만들기 ([Gemini API 키 문서](https://ai.google.dev/gemini-api/docs/api-key)).
+2. Windows 검색 → "계정의 환경 변수 편집" → 새로 만들기 → 이름 `GEMINI_API_KEY`, 값에 키. **키를 Claude Code 채팅에 붙여넣지 마세요.**
+3. PowerShell을 새로 열고 모델 확인:
+```powershell
+python council/scripts/council.py models gemini --filter flash
+```
+**통과 기준**: Flash 모델 ID 목록이 나옴. 하나를 골라 `council/members.json`의 `gemini` → `model`에 적습니다.
 
 ---
 
@@ -94,7 +101,7 @@ codex login status
 ```powershell
 python council/scripts/council.py check
 ```
-**통과 기준**: `gemini`, `codex` 줄에 `명령 ...: 있음`.
+**통과 기준**: `codex` 줄에 `명령 codex: 있음`, `gemini` 줄에 `환경변수 GEMINI_API_KEY: 설정됨`, 마지막에 `의장: gemini — 설정 확인됨`.
 
 ```powershell
 python council/scripts/council.py check --ping
@@ -104,7 +111,8 @@ python council/scripts/council.py check --ping
   ✓ gemini: 성공 (…초) - OK
   ✓ codex: 성공 (…초) - OK
 ```
-- 실패 예시(🧪 로그인 전): `! gemini: 실패 (2.2초) - 종료 코드 41: Please set an Auth method ...` → 4단계 로그인 다시.
+- PC 실측(다른 세션 보고): `✓ codex: 성공 (7.6초)`. Gemini는 API 키 연결 후 다시 확인해야 합니다.
+- `! gemini: 실패 - HTTP 400/404` → model ID 확인, `HTTP 429` → 무료 한도 초과, `환경변수 GEMINI_API_KEY 가 설정되지 않았습니다` → 4단계 환경변수 확인 후 창을 새로 열기.
 - `시간 초과`가 나오면 네트워크·로그인 문제일 수 있습니다(🧪 클라우드에서는 OpenAI 연결이 막혀 Codex가 계속 재연결했음).
 
 ---

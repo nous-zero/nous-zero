@@ -19,6 +19,8 @@ argument-hint: "<안건>"
 4. **원문 그대로 저장**: 서브에이전트가 반환한 텍스트나 사용자가 붙여넣은 답변은 한 글자도 바꾸지 않고 응답 파일에 저장한다.
 5. **사실과 추론 구분**: 자료(fact-sheet)의 모든 항목에는 출처를 적고, 출처 없는 내용은 `[추론]`으로 표시한다. 사용자에게 보고할 때도 같다.
 6. 응답이 2개 미만이면 다음 단계로 가지 말고 사용자에게 알린다. 실패한 위원은 `$RUN/logs/`의 오류를 요약해 알린다.
+7. **회의 보류**: 의장(`gemini`)이 준비되지 않으면 회의를 열지 않는다(사용자 결정). `new`가 막으면 `--ignore-chair`로 우회하지 말고, `check`가 알려 주는 이유와 해결 절차(`council/README.md`의 "Gemini 연결")를 사용자에게 안내한다.
+8. **API 키는 다루지 않는다**: 사용자가 키를 채팅에 붙여넣으려 하면 막고, Windows 환경변수에 직접 넣도록 안내한다. Gemini 무료 등급은 입력이 구글 제품 개선에 쓰일 수 있으므로 자료표에 비공개 정보를 넣지 않는다.
 
 ## 절차
 
@@ -33,7 +35,7 @@ argument-hint: "<안건>"
 ### 2. Stage 1 — 독립 의견 (모든 위원 동시 진행)
 1. `python council/scripts/council.py stage1 $RUN --prepare` — 모든 위원의 프롬프트 파일을 먼저 만든다(호출 없음, 수초).
 2. 아래 세 갈래를 **같은 응답 안에서 동시에** 시작한다. 하나가 끝나기를 기다렸다가 다음을 시작하지 않는다.
-   - **CLI 위원**: `python council/scripts/council.py stage1 $RUN`을 Bash의 백그라운드 실행으로 띄운다. Gemini·Codex가 스크립트 안에서 병렬로 호출된다.
+   - **자동 위원**: `python council/scripts/council.py stage1 $RUN`을 Bash의 백그라운드 실행으로 띄운다. Gemini(API)·Codex(CLI)가 스크립트 안에서 병렬로 호출된다.
    - **Claude**: Agent 도구를 백그라운드로 실행해 규칙 3의 문구로 `$RUN/stage1/prompts/claude.md`를 넘긴다. 결과가 오면 `$RUN/stage1/responses/claude.md`에 저장한다.
    - **브라우저 위원** (`meta-ai`·`perplexity`·`grok-web`): `settings.browser_mode`를 따른다. 사용자가 이번 회의에서 다른 방식을 말하면 그것을 따른다.
      - `assist`(기본) → A. 단, Claude in Chrome 도구가 없거나 사용자가 없는 무인 실행(`claude -p` 등)이면 C로 바꾸고 그 사실을 보고한다.
@@ -49,11 +51,11 @@ argument-hint: "<안건>"
 
 ### 3. Stage 2 — 익명 상호평가 (동시 진행)
 1. `python council/scripts/council.py stage2 $RUN --prepare` — 라벨(Response A, B…)을 무작위로 붙이고 평가자마다 순서를 섞은 프롬프트를 만든다. 반론자(Devil's Advocate)는 회의마다 돌아가며 정해진다.
-2. 동시에 시작한다: `python council/scripts/council.py stage2 $RUN`(백그라운드, Gemini·Codex 병렬 평가) + `claude` 평가 서브에이전트(`$RUN/stage2/prompts/claude.md` → `$RUN/stage2/responses/claude.md`).
+2. 동시에 시작한다: `python council/scripts/council.py stage2 $RUN`(백그라운드, Gemini API·Codex 병렬 평가) + `claude` 평가 서브에이전트(`$RUN/stage2/prompts/claude.md` → `$RUN/stage2/responses/claude.md`).
 3. 둘 다 끝나면 `python council/scripts/council.py aggregate $RUN` — 평가 마지막 줄의 `FINAL RANKING`을 읽어 평균 순위를 낸다. 읽기 실패한 평가가 있으면 사용자에게 알린다.
 
 ### 4. Stage 3 — 의장 종합 (의장: Gemini 고정)
-1. `python council/scripts/council.py stage3 $RUN` — 사용자 결정에 따라 의장은 항상 `gemini`다(`settings.chair_rotation: ["gemini"]`). 스크립트가 Gemini CLI로 자동 실행한다.
+1. `python council/scripts/council.py stage3 $RUN` — 사용자 결정에 따라 의장은 항상 `gemini`다(`settings.chair_rotation: ["gemini"]`). 스크립트가 Gemini API(키 방식)로 자동 실행한다.
 2. 의장 호출이 실패하면 다른 위원으로 바꾸지 말고 오류를 사용자에게 보고한 뒤 `stage3 $RUN`을 다시 시도한다. 사용자가 이번 회의만 바꾸라고 하면 `--chair <id>`를 쓴다.
 
 ### 5. 기록과 보고
