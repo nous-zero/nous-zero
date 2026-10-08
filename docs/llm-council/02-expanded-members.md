@@ -43,6 +43,7 @@
 | ↳ 구독 없이 사용 | 선불 크레딧 | **Pro 구독 없이도 API 사용 가능** — API는 구독과 별도로 결제되며, 결제수단 등록 → 크레딧 구매 → 잔액이 있을 때 API 키 발급 ([Perplexity Getting Started](https://docs.perplexity.ai/getting-started), [Apideck](https://radar.apideck.com/blog/how-to-get-your-perplexity-api-key)). 최소 구매액은 미확인 ⚠️ | 🔎 **구독 불필요** |
 | ↳ Pro 구독 혜택 | 구독 시 | Pro 구독자에게 매월 API 크레딧 $5 지급 ([Perplexity Help](https://hub-prod.perplexity.ai/hub/faq/pplx-api)) — 단, 2026년에는 이 혜택이 없어졌다는 보고도 있음 ⚠️ ([Perplexity Community](https://community.perplexity.ai/t/perplexity-pro-bonus-for-the-api-is-set-to-zero/51), [Apideck](https://radar.apideck.com/blog/how-to-get-your-perplexity-api-key)) | 🔎 API만을 위해 $20/월 구독은 비효율 |
 | ↳ 주의 | — | Sonar Chat Completions 엔드포인트가 2026-09-27까지 지원 후 Agent API로 이전한다는 보도 ([CloudZero](https://www.cloudzero.com/blog/perplexity-api-pricing/)) ⚠️ | 연결 시 현재 엔드포인트 확인 필수 |
+| **Perplexity 공식 MCP 서버** | API 크레딧 | Claude Code에 연결하면 `perplexity_search`·`perplexity_ask` 등 도구로 Perplexity를 호출. npm 패키지 `@perplexity-ai/mcp-server`, `PERPLEXITY_API_KEY` 필요 ([Perplexity MCP 문서](https://docs.perplexity.ai/guides/mcp-server), [API Tracker](https://apitracker.io/mcp-server/perplexity)) | 🔎 `claude -p`는 Claude만 실행하므로 Perplexity를 쓰려면 이 경로나 API가 필요. Claude가 결과를 요약·선별하지 않도록 **원문을 Fact Sheet에 그대로 저장** |
 | **OpenRouter** | 유료 | Perplexity 모델 15종 제공, 예: Sonar Reasoning Pro $2/$8 ([OpenRouter Perplexity 페이지](https://openrouter.helicone.ai/perplexity)) | 관문 통일용 |
 
 ### 1.4 GPT (OpenAI)
