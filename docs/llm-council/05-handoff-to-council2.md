@@ -90,3 +90,52 @@
 - 매일 루틴: LeetCode Easy 1문제, GDPO.py 50줄 한국어 주석, GitHub 커밋 (README "Daily Learning Routine").
 - PC: AMD Ryzen 7 8700G + Radeon 780M(내장), RAM 32GB, Windows 11 Home.
 - 계정: Claude Max(유료), Google AI Pro(유료, 단 Gemini CLI에는 소용없음), ChatGPT·meta.ai·perplexity.ai·grok.com은 무료 계정.
+
+---
+
+## ③ 미완료·보류 작업과 다음 단계
+
+| # | 작업 | 상태 | 누가 | 다음 행동 |
+|---|---|---|---|---|
+| T1 | Gemini `model` 확정 | Council 2가 실측 중 (아래 참고) | Council 2 + 대표님 | 안정적인 Flash 모델을 대표님과 정해 `members.json`의 `gemini.model`에 기록 |
+| T2 | **429·503 재시도(지수 백오프)** | 없음 — `call_openai_compatible`이 한 번 실패하면 끝. 의장 고정이라 503 한 번에 3단계 정지 | Council 2 (예정이라고 보고) | 구글 권고대로 지수 백오프 재시도 추가 ([Gemini API 문제 해결](https://ai.google.dev/gemini-api/docs/troubleshooting)) + 테스트 |
+| T3 | 테스트 정리 | `OpenAICompatibleTest.tearDown`에 `server.shutdown()`만 있고 `server_close()` 없음 → ResourceWarning 4건 (Council 2 보고, 시험 코드만) | Council 2 | `server_close()` 추가 |
+| T4 | 회의 보류 해제 | 의장 Gemini 준비 전까지 보류 (D21) | Council 2 | T1 후 `check --ping`에서 `의장: gemini — 설정 확인됨` + 성공 확인 |
+| T5 | 04 체크리스트 6~8단계 | 미실행 (Chrome 연결, CLI 위원만 연습 회의, 브라우저 포함 연습 회의) | Council 2 + 대표님 | 순서대로 실행, 결과를 Decision Log·문서에 기록 |
+| T6 | Windows 병렬 실행 확인 | 단위 테스트는 통과(Council 2), 실제 위원 병렬은 미확인 | Council 2 | 연습 회의 출력의 위원별 `(N초)` 비교 |
+| T7 | `ai-terms/*.md` PC 폴더 복사 | 미완 | Council 2 | ②의 2-1 참고 |
+| T8 | 매일 트렌드 루틴 (D9) | 설계만 (01 문서 5장), 미구현 | Council 2 + 대표님 결정 | 무인 실행이면 브라우저 위원은 자동 생략(SKILL.md). Windows 작업 스케줄러 + `claude -p "/llm-council …"` 같은 바깥 실행은 중첩 문제 없음 [추론] |
+| T9 | Phase B 데이터 레이어 | 미착수 | Council 2 + 대표님 | YouTube Data API 키 발급(대표님), 채널·영상 스냅샷 스크립트, Playboard 산식·약관 확인 |
+| T10 | 채점 기준 개선 | 초안 v0.1 | 회의 후 | 첫 회의 결과와 실제 성과를 비교해 `rubrics/` 수정 |
+| T11 | main 병합 PR | 요청 없음 | 대표님 결정 | 요청 시 PR 생성 |
+| T12 | 유료 위원 결정 | 보류 (D14) | 대표님 | Grok(API 종량제 vs SuperGrok+Grok Build CLI), Perplexity API, OpenRouter $10, Meta Model API — 요청 시 재검토 |
+| T13 | Meta Model API 한국 가입 가능 여부 | Council 1이 대표님께 확인 요청했으나 답 없음 | 대표님 | 유료 보류와 함께 대기 |
+| T14 | Codex 무료 계정 한도 | 미확인 | Council 2 | 연습 회의를 반복하며 한도 오류 여부 관찰 |
+
+**Council 2가 이미 한 것 (Council 2 보고 그대로, 중복 불필요)**
+- `0216f6e` pull, 단위 테스트 16개 OK.
+- `GEMINI_API_KEY` 등록, AI Studio 결제 등급 «무료 등급», `models gemini --filter flash` → 26개.
+- 실호출 8회: 3.8-flash 1/3 성공(나머지 HTTP 503 혼잡), 3.7-flash 1/2, 3.5-flash 2/2, flash-latest 1/1(70초). 같은 모델이 몇 초 사이 성공→503 → 일시 혼잡.
+- Codex: ChatGPT 로그인 완료, ping ✓ 7.6초.
+
+---
+
+## ④ 알려진 결함·의심 지점·시험 안 한 경로
+
+### 4-1. 코드 결함·약점
+- **재시도 없음** (T2). 503이 잦은 무료 등급 + 의장 고정 조합에서 가장 큰 위험.
+- **`new`의 회의 보류 확인은 정적 점검**: 환경변수·model 값만 보고 실제 호출은 안 함 → 통과해도 회의 중 의장 호출이 실패할 수 있음. 회의 전 `check --ping` 권장.
+- **반론자(Devil's Advocate) 순환**: `devil_advocate_rotation`이 `codex → gemini → claude` 순. 그 회의의 반론자가 2단계에서 실패하면 그 회의엔 반론이 없음 (대체 지정 로직 없음).
+- **자기소개 가리기 정규식**: "I am Claude", "저는 Gemini", "As ChatGPT," 형태만 가림. 다른 표현(예: "Google이 만든 모델로서")은 통과할 수 있고, 반대로 "나는 Meta …" 같은 일반 문장을 잘못 가릴 수도 있음. 실제 출력으로 시험 안 함.
+- **`FINAL RANKING` 파싱**: 마지막 `FINAL RANKING` 줄의 대문자 한 글자만 읽음. 모델이 "최종 순위:"처럼 바꿔 쓰면 읽기 실패 → `aggregate`가 실패 수를 알려줌. 실제 모델 출력으로 시험 안 함.
+- **의장 Gemini의 자기 선호 가능성**: Gemini도 1단계 답을 내므로 익명이어도 자기 답을 알아볼 수 있음 ([Panickssery et al., 2024](https://arxiv.org/abs/2404.13076)). 기록이 쌓이면 Gemini 답의 채택 빈도 점검 권장.
+- **병렬 테스트의 시간 조건**(`< 4.0초`)은 느린 PC에서 흔들릴 수 있음.
+- **`--prepare` 후 재실행 시 질문 파일 보존**은 "내용이 같으면 다시 쓰지 않음"으로 해결했지만, 회의 도중 자료표(fact-sheet)를 고치면 질문 파일이 바뀌어 위원마다 다른 질문을 받을 수 있음 → 회의 시작 후 자료표 수정 금지 [추론].
+
+### 4-2. 시험 안 한 경로 (클라우드에서 불가했던 것)
+- Claude in Chrome으로 meta.ai·perplexity.ai·grok.com 질문 전송·답변 복사 (화면 구조, 긴 답변·출처 링크 복사 정확도, 사이트별 첫 권한 화면) — 전부 미시험.
+- Claude Code의 Agent(서브에이전트)·Bash 백그라운드 동시 실행 — 로컬 버전에서 미시험. 안 되면 차례 실행으로 대체(SKILL.md 2-4).
+- Codex에 **긴 한국어 프롬프트**를 표준입력으로 넣는 실제 회의 호출 — ping(짧은 영어)만 성공.
+- Gemini API 의장 프롬프트(답변 전부 + 평가 전부가 들어가는 긴 입력)의 길이·시간 — 미시험. 무료 등급 토큰 한도에 걸릴 수 있음 [추론].
+- 1~5단계 전체 실제 회의 — 한 번도 실행 안 됨 (가짜 위원 테스트만 통과).
+- Windows 레거시 콘솔에서 한글 출력 — 미시험 (스크립트는 UTF-8로 출력 재설정).
