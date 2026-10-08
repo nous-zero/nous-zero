@@ -201,3 +201,20 @@
 2. 설계 배경은 `docs/llm-council/01~02`, 사용법은 `03`, Windows 시험 절차는 `04`.
 3. 첫 작업 추천 순서 [추론]: T2(재시도) → T3 → T1(모델 확정) → T4(보류 해제) → T5~T6(연습 회의) → 첫 안건.
 4. Council 1은 이 커밋 이후 이 브랜치를 수정하지 않습니다.
+
+---
+
+## Council 2 인수 확인과 처리 현황 (2026-10-08, 로컬 PC 세션 «LLM Council 2» 작성)
+
+인계 커밋 `5e7361b`~`1a51176` 4개를 PC에서 받아 읽었습니다. 아래는 PC 실측입니다.
+
+| # | 처리 | 근거 |
+|---|---|---|
+| T1 | **완료** — 대표님 선택 «gemini-3.8-flash (권장)». `members.json` 반영 | 대표님 선택지 응답 |
+| T2 | **완료** — `call_openai_compatible`이 429·408·5xx를 2·4·8·16초(+임의 지연) 간격, 최대 4번 재시도(`retries`로 조정). 401·400·404는 재시도 안 함. 숫자 `Retry-After`가 오면 그 값(최대 60초) | [Gemini API 문제 해결](https://ai.google.dev/gemini-api/docs/troubleshooting) "implementing an exponential backoff strategy" · 시험 4개 추가 |
+| T3 | **완료** — `tearDown`에 `server_close()`, `if __name__ == "__main__"`을 파일 끝으로 이동(직접 실행 시 API 위원 시험 4개가 빠지던 결함) | `python -W error::ResourceWarning -m unittest discover -s council/tests` → `Ran 20 tests ... OK` |
+| T4 | **완료(보류 해제)** — `check --ping` → `✓ gemini: 성공 (17.7초)`, `✓ codex: 성공 (5.9초)`, `의장: gemini — 설정 확인됨` | PC 실측 2026-10-08 18:24 |
+| T7 | 진행 — 인계 문서의 경로 `C:\Users\745ra\...`는 이 PC에 없음(`C:\Users\745ra` 없음). 대표님 선택으로 `C:\Users\USER\Desktop\Ai 용어 트랜드폴더`에 복사 | PC 실측 |
+| U4 | **해소** — 무료 등급 "Content used to improve our products", 유료 "Content **not** used…" | [Gemini API 요금](https://ai.google.dev/gemini-api/docs/pricing) (2026-10-07 갱신본, 직접 열람) |
+
+다음: T5~T6(04 체크리스트 6~8단계 — Chrome 연결, 연습 회의 ①·②).
