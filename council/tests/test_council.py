@@ -151,6 +151,28 @@ class PipelineTest(unittest.TestCase):
             self.assertTrue((run / f"stage1/prompts/{member_id}.md").exists())
         self.assertFalse((run / "stage1/responses").exists())
 
+        # The real run must not rewrite prompt files that Claude Code may be reading.
+        before = (run / "stage1/prompts/claude.md").stat().st_mtime_ns
+        code, _ = self.run_cli("stage1", str(run))
+        self.assertEqual(code, 0)
+        self.assertEqual((run / "stage1/prompts/claude.md").stat().st_mtime_ns, before)
+        self.assertTrue((run / "stage1/responses/fake-a.md").exists())
+
+    def test_stage2_prepare_then_run_keeps_labels_and_prompts(self):
+        _, out = self.run_cli("new", "평가 준비")
+        run = Path(out.strip().splitlines()[-1])
+        self.run_cli("stage1", str(run))
+        (run / "stage1/responses/claude.md").write_text("서브에이전트 답변", encoding="utf-8")
+        self.run_cli("stage2", str(run), "--prepare")
+        mapping = (run / ".mapping.json").read_text(encoding="utf-8")
+        before = (run / "stage2/prompts/claude.md").stat().st_mtime_ns
+        self.assertFalse((run / "stage2/responses").exists())
+        code, _ = self.run_cli("stage2", str(run))
+        self.assertEqual(code, 0)
+        self.assertEqual((run / ".mapping.json").read_text(encoding="utf-8"), mapping)
+        self.assertEqual((run / "stage2/prompts/claude.md").stat().st_mtime_ns, before)
+        self.assertTrue((run / "stage2/responses/fake-a.md").exists())
+
     def test_automated_members_are_called_in_parallel(self):
         slow = self.tmp / "slow_member.py"
         slow.write_text("import sys, time\nsys.stdin.read()\ntime.sleep(1.5)\nprint('ok')\n", encoding="utf-8")

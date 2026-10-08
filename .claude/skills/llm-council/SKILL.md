@@ -45,6 +45,7 @@ argument-hint: "<안건>"
      - **B. 직접 붙여넣기** — 사용자가 프롬프트를 사이트에 넣고, 받은 답변을 채팅에 붙여넣으면 진행자가 원문 그대로 저장한다.
      - **C. 이번엔 생략** — 기다리지 않는다.
 3. 세 갈래가 모두 끝나면 `python council/scripts/council.py status $RUN`으로 빠진 응답을 확인한다.
+4. 이 환경에서 Bash나 Agent를 백그라운드로 실행할 수 없으면 차례로 실행해도 된다. 각 위원은 자기 프롬프트 파일만 보고 자기 응답 파일에만 쓰므로 결과는 같고 시간만 더 걸린다.
 
 ### 3. Stage 2 — 익명 상호평가 (동시 진행)
 1. `python council/scripts/council.py stage2 $RUN --prepare` — 라벨(Response A, B…)을 무작위로 붙이고 평가자마다 순서를 섞은 프롬프트를 만든다. 반론자(Devil's Advocate)는 회의마다 돌아가며 정해진다.

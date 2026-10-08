@@ -235,7 +235,11 @@ def collect(run: Path, stage_dir: str, members: list[dict], prompts: dict[str, s
     for m in members:
         if m["id"] not in prompts:
             continue
-        write(run / stage_dir / "prompts" / f"{m['id']}.md", prompts[m["id"]])
+        # Rewrite only when the text changed: after `--prepare`, Claude Code may be
+        # reading this file for a subagent or a browser tab while we run again.
+        prompt_path = run / stage_dir / "prompts" / f"{m['id']}.md"
+        if not prompt_path.exists() or read(prompt_path) != prompts[m["id"]]:
+            write(prompt_path, prompts[m["id"]])
         if (run / stage_dir / "responses" / f"{m['id']}.md").exists() and not force:
             print(f"  = {m['id']}: 응답이 이미 있어 건너뜀")
         elif m.get("type") in WAITING_TYPES:
