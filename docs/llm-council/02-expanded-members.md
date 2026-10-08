@@ -40,7 +40,8 @@
 | 경로 | 비용 | 확인된 사실 | 비고 |
 |---|---|---|---|
 | **Perplexity API (Sonar)** | 유료 | Sonar: 입력·출력 각 $1/100만 토큰 + **검색 요청 수수료**(1,000회당 $5~12, 출처 간 상이 ⚠️). 질문 1건 약 $0.0054 예시 ([Puter](https://developer.puter.com/tutorials/perplexity-api-pricing/), [CostBench](https://costbench.com/software/ai-search-apis/perplexity-sonar-api/)) | 🔎 **웹 근거·출처 제시** → 팩트체커 역할에 적합 |
-| ↳ Pro 구독 혜택 | 구독 시 | Perplexity **Pro 구독자는 매월 1일 API 크레딧 $5 지급** ([Perplexity Help](https://hub-prod.perplexity.ai/hub/faq/pplx-api)) | $5 ≈ 약 900회 질문 (위 예시 단가 기준 🔎 계산) |
+| ↳ 구독 없이 사용 | 선불 크레딧 | **Pro 구독 없이도 API 사용 가능** — API는 구독과 별도로 결제되며, 결제수단 등록 → 크레딧 구매 → 잔액이 있을 때 API 키 발급 ([Perplexity Getting Started](https://docs.perplexity.ai/getting-started), [Apideck](https://radar.apideck.com/blog/how-to-get-your-perplexity-api-key)). 최소 구매액은 미확인 ⚠️ | 🔎 **구독 불필요** |
+| ↳ Pro 구독 혜택 | 구독 시 | Pro 구독자에게 매월 API 크레딧 $5 지급 ([Perplexity Help](https://hub-prod.perplexity.ai/hub/faq/pplx-api)) — 단, 2026년에는 이 혜택이 없어졌다는 보고도 있음 ⚠️ ([Perplexity Community](https://community.perplexity.ai/t/perplexity-pro-bonus-for-the-api-is-set-to-zero/51), [Apideck](https://radar.apideck.com/blog/how-to-get-your-perplexity-api-key)) | 🔎 API만을 위해 $20/월 구독은 비효율 |
 | ↳ 주의 | — | Sonar Chat Completions 엔드포인트가 2026-09-27까지 지원 후 Agent API로 이전한다는 보도 ([CloudZero](https://www.cloudzero.com/blog/perplexity-api-pricing/)) ⚠️ | 연결 시 현재 엔드포인트 확인 필수 |
 | **OpenRouter** | 유료 | Perplexity 모델 15종 제공, 예: Sonar Reasoning Pro $2/$8 ([OpenRouter Perplexity 페이지](https://openrouter.helicone.ai/perplexity)) | 관문 통일용 |
 
@@ -149,13 +150,15 @@ flowchart LR
 
 ## 5. 연결 순서 제안 (🔎 Claude 추론)
 
+> **Phase A는 $0으로 시작 가능** (2026-10-08 질의응답 반영): OpenRouter $10 충전과 Perplexity 구독은 **필수가 아닙니다.** 1~2번(GPT·Meta)만으로 Claude·Gemini·GPT·Llama 4개 회사 모델의 Council이 구성됩니다. OpenRouter 무료 모델도 충전 없이 하루 50회까지 사용 가능합니다 ([OpenRouter Limits](https://openrouter.ai/docs/api-reference/limits)). Perplexity·Grok은 유료라 3~4번 단계로 미루고, 그 사이 웹 근거 수집은 Gemini CLI의 내장 웹 검색 도구 `google_web_search`로 대신할 수 있습니다 ([Gemini CLI Tools](https://geminicli.com/docs/tools)).
+
 | 순서 | 작업 | 비용 |
 |---|---|---|
 | 1 | Codex CLI 설치 → ChatGPT 무료 계정 로그인 → `codex exec` 동작·한도 확인 (**GPT**) | $0 |
 | 2 | Groq 계정·API 키 발급 → Llama 3.3 70B 호출 테스트 (**Meta**) | $0 |
 | 3 | OpenRouter 가입 → **$10 1회 충전** → Perplexity Sonar·Grok 호출 테스트 (**Perplexity·Grok**) + 무료 모델 1,000회/일 확보 | $10 |
 | 4 | (선택) X 실시간 트렌드가 중요하면 xAI API 직접 연결해 `x_search` 테스트 | 사용량 비례 |
-| 5 | (선택) Perplexity Pro 구독 중이거나 구독할 계획이면 월 $5 API 크레딧 활용 | 구독료 |
+| 5 | (선택) Perplexity를 OpenRouter 대신 직접 연결하려면 Perplexity API 크레딧만 구매 (구독 불필요) | 사용량 비례 |
 
 ---
 
@@ -179,7 +182,9 @@ flowchart LR
 - X 검색 과금 변경 — https://runtimewire.com/article/xai-is-changing-the-economics-of-x-search-runtimewire-was-built-for-a-narrower-r
 - xAI 무료 크레딧 — https://agentdeals.dev/vendor/xai , https://wikidocs.net/381613
 - Perplexity 가격 — https://developer.puter.com/tutorials/perplexity-api-pricing/ , https://costbench.com/software/ai-search-apis/perplexity-sonar-api/ , https://www.cloudzero.com/blog/perplexity-api-pricing/
-- Perplexity Pro API 크레딧 — https://hub-prod.perplexity.ai/hub/faq/pplx-api
+- Perplexity Pro API 크레딧 — https://hub-prod.perplexity.ai/hub/faq/pplx-api , 혜택 중단 보고 — https://community.perplexity.ai/t/perplexity-pro-bonus-for-the-api-is-set-to-zero/51
+- Perplexity API 시작하기 — https://docs.perplexity.ai/getting-started , https://radar.apideck.com/blog/how-to-get-your-perplexity-api-key
+- Gemini CLI Tools — https://geminicli.com/docs/tools
 - OpenAI Codex — https://help.openai.com/en/articles/11369540-codex-usage-limits , https://developers.openai.com/codex/noninteractive
 - OpenAI API 가격(서드파티) — https://morphllm.com/openai-api-pricing , https://intuitionlabs.ai/articles/chatgpt-api-pricing-2026-token-costs-limits
 - OpenAI Terms of Use — https://openai.com/policies/terms-of-use/
