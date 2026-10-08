@@ -50,6 +50,11 @@ from pathlib import Path
 
 AUTOMATED_TYPES = {"command", "openai_compatible"}
 PING_PROMPT = "Reply with exactly one word: OK"
+# Transient HTTP errors worth retrying with exponential backoff
+# (https://ai.google.dev/gemini-api/docs/troubleshooting: retry 429, 408 and 5xx).
+RETRY_STATUS = {408, 429, 500, 502, 503, 504}
+DEFAULT_RETRIES = 4
+_sleep = time.sleep  # tests replace this so retries do not really wait
 WAITING_TYPES = {"subagent", "manual"}
 DEFAULT_COUNCIL_DIR = Path(__file__).resolve().parent.parent
 
@@ -222,19 +227,38 @@ def member_ready(member: dict) -> str | None:
     return None
 
 
+def retry_delay(attempt: int, retry_after: str | None) -> float:
+    """Seconds to wait before retry number attempt+1: 2, 4, 8, 16... plus jitter.
+
+    A numeric Retry-After header from the server wins (capped at 60 seconds).
+    """
+    if retry_after and retry_after.strip().isdigit():
+        return min(float(retry_after), 60.0)
+    return min(2.0 ** (attempt + 1), 32.0) + random.uniform(0, 1)
+
+
 def call_openai_compatible(member: dict, prompt: str) -> str:
     headers = auth_headers(member)
     body = {"model": member["model"], "messages": [{"role": "user", "content": prompt}]}
     url = member["base_url"].rstrip("/") + "/chat/completions"
     request = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers)
-    try:
-        with urllib.request.urlopen(request, timeout=member.get("timeout", 600)) as response:
-            data = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        detail = e.read().decode("utf-8", errors="replace")[:800]
-        raise MemberError(f"HTTP {e.code}: {detail}")
-    except (urllib.error.URLError, TimeoutError) as e:
-        raise MemberError(f"연결 실패: {e}")
+    retries = member.get("retries", DEFAULT_RETRIES)
+    for attempt in range(retries + 1):
+        try:
+            with urllib.request.urlopen(request, timeout=member.get("timeout", 600)) as response:
+                data = json.loads(response.read().decode("utf-8"))
+            break
+        except urllib.error.HTTPError as e:
+            detail = e.read().decode("utf-8", errors="replace")[:800]
+            if e.code in RETRY_STATUS and attempt < retries:
+                wait = retry_delay(attempt, e.headers.get("Retry-After"))
+                print(f"  … {member['id']}: HTTP {e.code}, {wait:.1f}초 뒤 다시 시도 ({attempt + 1}/{retries})", flush=True)
+                _sleep(wait)
+                continue
+            tried = f" ({attempt}회 다시 시도한 뒤)" if attempt else ""
+            raise MemberError(f"HTTP {e.code}{tried}: {detail}")
+        except (urllib.error.URLError, TimeoutError) as e:
+            raise MemberError(f"연결 실패: {e}")
     try:
         text = data["choices"][0]["message"]["content"]
     except (KeyError, IndexError, TypeError):

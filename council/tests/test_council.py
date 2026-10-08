@@ -219,10 +219,6 @@ class PipelineTest(unittest.TestCase):
         self.assertIn("최소 2개", out)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class OpenAICompatibleTest(unittest.TestCase):
     """API members (e.g. Gemini via its OpenAI-compatible endpoint) against a local fake server."""
 
@@ -254,11 +250,18 @@ class OpenAICompatibleTest(unittest.TestCase):
                 self.rfile.read(length)
                 if self.headers.get("Authorization") != "Bearer test-key":
                     self.reply(401, {"error": "bad key"})
+                elif self.server.fail_next > 0:
+                    self.server.fail_next -= 1
+                    self.reply(503, {"error": {"code": 503, "status": "UNAVAILABLE"}})
                 else:
                     self.reply(200, {"choices": [{"message": {"content": "OK"}}]})
 
         self.server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        self.server.fail_next = 0  # answer this many chat requests with HTTP 503 first
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
+        self.waits = []
+        self.saved_sleep = council._sleep
+        council._sleep = self.waits.append
         self.saved_env = dict(os.environ)
         os.environ.update({"TEST_GEM_KEY": "test-key", "NO_PROXY": "127.0.0.1,localhost", "no_proxy": "127.0.0.1,localhost"})
 
@@ -267,20 +270,22 @@ class OpenAICompatibleTest(unittest.TestCase):
             shutil.copytree(COUNCIL_DIR / name, self.tmp / name)
         self.write_config("gemini-x-flash")
 
-    def write_config(self, model):
+    def write_config(self, model, **extra):
         config = {
             "settings": {"chair_rotation": ["gem"], "min_responses": 2},
             "members": [{
                 "id": "gem", "label": "Gem", "type": "openai_compatible", "enabled": True,
                 "base_url": f"http://127.0.0.1:{self.server.server_port}/v1",
-                "model": model, "api_key_env": "TEST_GEM_KEY", "timeout": 10,
+                "model": model, "api_key_env": "TEST_GEM_KEY", "timeout": 10, **extra,
             }],
         }
         (self.tmp / "members.json").write_text(json.dumps(config), encoding="utf-8")
 
     def tearDown(self):
         import os
+        council._sleep = self.saved_sleep
         self.server.shutdown()
+        self.server.server_close()
         os.environ.clear()
         os.environ.update(self.saved_env)
         shutil.rmtree(self.tmp)
@@ -319,3 +324,37 @@ class OpenAICompatibleTest(unittest.TestCase):
         self.assertFalse((self.tmp / "runs").exists())
         code, _ = self.run_cli("new", "보류 시험", "--ignore-chair")
         self.assertEqual(code, 0)
+
+    def test_transient_503_is_retried_with_growing_waits(self):
+        self.server.fail_next = 2
+        code, out = self.run_cli("check", "--ping")
+        self.assertEqual(code, 0, out)
+        self.assertIn("✓ gem: 성공", out)
+        self.assertIn("HTTP 503", out)
+        self.assertEqual(len(self.waits), 2)
+        self.assertLess(self.waits[0], self.waits[1])
+
+    def test_gives_up_after_the_retry_limit(self):
+        self.write_config("gemini-x-flash", retries=1)
+        self.server.fail_next = 5
+        code, out = self.run_cli("check", "--ping")
+        self.assertEqual(code, 1)
+        self.assertIn("HTTP 503 (1회 다시 시도한 뒤)", out)
+        self.assertEqual(len(self.waits), 1)
+
+    def test_bad_key_is_not_retried(self):
+        import os
+        os.environ["TEST_GEM_KEY"] = "wrong-key"
+        code, out = self.run_cli("check", "--ping")
+        self.assertEqual(code, 1)
+        self.assertIn("HTTP 401", out)
+        self.assertEqual(self.waits, [])
+
+    def test_retry_after_header_wins_and_is_capped(self):
+        self.assertEqual(council.retry_delay(0, "7"), 7.0)
+        self.assertEqual(council.retry_delay(0, "600"), 60.0)
+        self.assertGreaterEqual(council.retry_delay(2, None), 8.0)
+
+
+if __name__ == "__main__":
+    unittest.main()
