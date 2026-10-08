@@ -2,12 +2,35 @@
   "settings": {
     "output_language": "Korean",
     "default_rubric": "general",
-    "chair_rotation": ["claude", "gemini"],
-    "devil_advocate_rotation": ["codex", "gemini", "claude"],
+    "chair_rotation": [
+      "claude",
+      "gemini"
+    ],
+    "devil_advocate_rotation": [
+      "codex",
+      "gemini",
+      "claude"
+    ],
     "min_responses": 2,
     "self_reference_terms": [
-      "Claude", "Anthropic", "Gemini", "Google", "ChatGPT", "GPT", "Codex", "OpenAI",
-      "Llama", "Meta AI", "Meta", "Muse Spark", "Qwen", "Grok", "xAI", "Perplexity", "Sonar", "DeepSeek"
+      "Claude",
+      "Anthropic",
+      "Gemini",
+      "Google",
+      "ChatGPT",
+      "GPT",
+      "Codex",
+      "OpenAI",
+      "Llama",
+      "Meta AI",
+      "Meta",
+      "Muse Spark",
+      "Qwen",
+      "Grok",
+      "xAI",
+      "Perplexity",
+      "Sonar",
+      "DeepSeek"
     ]
   },
   "members": [
@@ -23,50 +46,78 @@
       "id": "gemini",
       "label": "Gemini (Gemini CLI)",
       "type": "command",
-      "command": ["gemini"],
+      "command": [
+        "gemini",
+        "--skip-trust",
+        "-o",
+        "text",
+        "-p",
+        "위 내용의 지시에 따라 답변 텍스트만 작성하세요."
+      ],
       "output": "stdout",
       "timeout": 600,
       "enabled": true,
       "paid": false,
-      "note": "Google AI Pro 구독(하루 1,500회). 프롬프트는 표준입력으로 전달. 비대화식 플래그는 버전마다 다를 수 있으니 gemini --help로 확인."
+      "note": "Google AI Pro 구독(하루 1,500회). 프롬프트는 표준입력으로 전달하고, -p 문구가 그 뒤에 붙는다(Gemini CLI 0.63.0 도움말 기준). --skip-trust는 빈 임시 폴더를 이번 실행에만 신뢰."
     },
     {
       "id": "codex",
       "label": "GPT (Codex CLI)",
       "type": "command",
-      "command": ["codex", "exec", "--skip-git-repo-check", "--sandbox", "read-only", "--output-last-message", "{output_file}", "-"],
+      "command": [
+        "codex",
+        "exec",
+        "--skip-git-repo-check",
+        "--sandbox",
+        "read-only",
+        "--ephemeral",
+        "--color",
+        "never",
+        "--output-last-message",
+        "{output_file}",
+        "-"
+      ],
       "output": "file",
       "timeout": 900,
       "enabled": true,
       "paid": false,
-      "note": "ChatGPT 무료 계정으로 codex login. '-'는 표준입력에서 프롬프트를 읽는다는 뜻."
+      "note": "ChatGPT 무료 계정으로 codex login. '-'는 표준입력에서 프롬프트를 읽는다는 뜻, --ephemeral은 세션 파일을 남기지 않음(codex-cli 0.161.0 도움말 기준)."
     },
     {
       "id": "meta-ai",
       "label": "Meta AI (브라우저 수동)",
       "type": "manual",
-      "stages": [1],
+      "stages": [
+        1
+      ],
       "enabled": true,
       "paid": false,
-      "note": "사용자가 meta.ai에 프롬프트를 붙여넣고 답변을 응답 파일에 붙여넣는다. 복사·붙여넣기 부담을 줄이려고 Stage 1에만 참여."
+      "browser_url": "https://www.meta.ai/",
+      "note": "meta.ai 무료 계정. 사용자가 직접 붙여넣거나, 사용자가 지켜보는 가운데 Claude in Chrome이 붙여넣고 답변을 복사한다. Stage 1에만 참여."
     },
     {
       "id": "perplexity",
       "label": "Perplexity (브라우저 수동)",
       "type": "manual",
-      "stages": [1],
+      "stages": [
+        1
+      ],
       "enabled": true,
       "paid": false,
-      "note": "무료 계정. 사용자가 perplexity.ai에 프롬프트를 붙여넣고 답변(출처 포함)을 응답 파일에 붙여넣는다."
+      "browser_url": "https://www.perplexity.ai/",
+      "note": "perplexity.ai 무료 계정. 사용자가 직접 붙여넣거나, 사용자가 지켜보는 가운데 Claude in Chrome이 붙여넣고 답변(출처 포함)을 복사한다."
     },
     {
       "id": "grok-web",
       "label": "Grok (브라우저 수동)",
       "type": "manual",
-      "stages": [1],
+      "stages": [
+        1
+      ],
       "enabled": true,
       "paid": false,
-      "note": "grok.com 무료 계정. 사용자가 프롬프트를 붙여넣고 답변을 응답 파일에 붙여넣는다."
+      "browser_url": "https://grok.com/",
+      "note": "grok.com 무료 계정. 사용자가 직접 붙여넣거나, 사용자가 지켜보는 가운데 Claude in Chrome이 붙여넣고 답변을 복사한다."
     },
     {
       "id": "llama-local",
@@ -84,9 +135,15 @@
       "id": "claude-cli",
       "label": "Claude (claude -p, 일반 터미널 전용)",
       "type": "command",
-      "command": ["claude", "-p"],
+      "command": [
+        "claude",
+        "-p"
+      ],
       "output": "stdout",
-      "unset_env": ["CLAUDECODE", "CLAUDE_CODE_ENTRYPOINT"],
+      "unset_env": [
+        "CLAUDECODE",
+        "CLAUDE_CODE_ENTRYPOINT"
+      ],
       "timeout": 900,
       "enabled": false,
       "paid": false,

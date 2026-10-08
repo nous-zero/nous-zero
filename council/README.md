@@ -17,19 +17,20 @@
 
 - 꺼져 있는 예비 위원: `llama-local`(로컬 Ollama), `claude-cli`(Claude Code 밖에서 실행할 때), `openrouter-free`(OpenRouter 무료 모델)
 - 유료 위원(`grok`, `perplexity-api`)은 `"paid": true`라 `--allow-paid` 없이는 실행되지 않습니다. 사용자가 요청할 때까지 보류합니다.
-- 브라우저 위원을 **자동 조작하지 않고 사람이 붙여넣는 이유**: Meta 약관은 허가 없는 자동 데이터 수집을 금지하고([ConductAtlas: Meta ToS](https://conductatlas.com/platform/meta/meta-terms-of-service/provision/CA-P-017687/no-automated-data-collection-without-permission/)), Perplexity 약관도 자동화된 방식의 데이터 추출을 제한하는 것으로 정리되어 있습니다([ConductAtlas: Perplexity ToS](https://conductatlas.com/platform/perplexity-ai/perplexity-terms-of-service/provision/CA-P-049606/prohibition-on-scraping-or-automated-data-extraction/)) ⚠️ 원문 확인 필요.
+- 브라우저 위원(`meta-ai`, `perplexity`, `grok-web`)은 회의마다 방식을 고릅니다: **A. 사용자가 지켜보는 가운데 Claude in Chrome이 붙여넣기·복사**, **B. 사용자가 직접 붙여넣기**, **C. 생략**. 로그인·CAPTCHA·동의 화면이 나오면 Claude는 멈추고 사용자에게 넘깁니다.
+- ⚠️ 각 사이트 약관의 자동화 관련 조항은 원문으로 확인하지 못했습니다(서드파티 정리 자료만 확인). 각 사이트 하단의 Terms 링크에서 직접 확인하세요.
 
 ## Windows 설치
 
 1. **Python 3.10+** — [python.org](https://www.python.org/downloads/). 이 도구는 표준 라이브러리만 씁니다.
 2. **Node.js (LTS)** — [nodejs.org](https://nodejs.org/). Gemini CLI와 Codex CLI 설치에 필요합니다.
-3. **Gemini CLI** — `npm install -g @google/gemini-cli` 후 `gemini`를 한 번 실행해 Google 계정으로 로그인 ([Gemini CLI 문서](https://geminicli.com/docs)). ⚠️ 설치 명령은 공식 문서에서 최신 확인.
-4. **Codex CLI** — `npm install -g @openai/codex` 후 `codex login`으로 ChatGPT 계정 로그인 ([Codex Auth](https://developers.openai.com/codex/auth)). ⚠️ 설치 명령은 공식 문서에서 최신 확인.
+3. **Gemini CLI** — `npm install -g @google/gemini-cli` 후 `gemini`를 한 번 실행해 Google 계정으로 로그인 ([Gemini CLI 문서](https://geminicli.com/docs)). 2026-10-08 이 환경에서 0.63.0 설치·도움말 확인.
+4. **Codex CLI** — `npm install -g @openai/codex` 후 `codex login`으로 ChatGPT 계정 로그인 ([Codex Auth](https://developers.openai.com/codex/auth)). 2026-10-08 이 환경에서 0.161.0 설치·도움말 확인.
 5. 점검: `python council/scripts/council.py check`
 
 ## 사용법
 
-Claude Code에서 `/llm-council <안건>`이라고 하면 [스킬](../.claude/skills/llm-council/SKILL.md)이 아래 순서를 진행합니다. 직접 실행할 때는:
+자세한 사용법은 [사용 가이드](../docs/llm-council/03-claude-code-usage-guide.md)를 보세요. Claude Code에서 `/llm-council <안건>`이라고 하면 [스킬](../.claude/skills/llm-council/SKILL.md)이 아래 순서를 진행합니다. 직접 실행할 때는:
 
 ```powershell
 python council/scripts/council.py new "최근 6~12개월 글로벌 급성장 채널 분석" --rubric youtube-growth

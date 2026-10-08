@@ -33,10 +33,14 @@ argument-hint: "<안건>"
 ### 2. Stage 1 — 독립 의견
 1. `python council/scripts/council.py stage1 $RUN` — Gemini·Codex 같은 CLI 위원은 스크립트가 자동으로 부른다(몇 분 걸릴 수 있음).
 2. `claude`(서브에이전트): 규칙 3의 문구로 `$RUN/stage1/prompts/claude.md`를 넘기고, 결과를 `$RUN/stage1/responses/claude.md`에 저장한다.
-3. `meta-ai`·`perplexity`·`grok-web`(수동): 사용자에게 안내한다.
-   - `$RUN/stage1/prompts/<id>.md` 내용을 복사해 meta.ai / perplexity.ai / grok.com에 붙여넣는다.
-   - 받은 답변을 채팅에 붙여넣어 주면 진행자가 `$RUN/stage1/responses/<id>.md`에 원문 그대로 저장한다.
-   - 사용자가 이번 회의에서 수동 위원을 건너뛰겠다고 하면 기다리지 않는다.
+3. `meta-ai`·`perplexity`·`grok-web`(브라우저 위원): 사용자에게 이번 회의의 방식을 묻는다.
+   - **A. 브라우저 보조 (사용자가 지켜봄)** — Claude in Chrome 도구가 연결되어 있을 때.
+     1. 위원마다 새 탭에서 `members.json`의 `browser_url`을 열고 새 대화를 시작한다.
+     2. `$RUN/stage1/prompts/<id>.md` 전문을 입력창에 붙여넣고 보낸다.
+     3. 답변 생성이 끝날 때까지 기다린 뒤, 답변 본문 전체를 복사해 `$RUN/stage1/responses/<id>.md`에 원문 그대로 저장한다.
+     4. 로그인 요구, CAPTCHA, 약관·쿠키 동의, 유료 업그레이드 안내가 나오면 그 자리에서 멈추고 사용자에게 넘긴다. 직접 우회하지 않는다.
+   - **B. 직접 붙여넣기** — 사용자가 프롬프트를 사이트에 넣고, 받은 답변을 채팅에 붙여넣으면 진행자가 원문 그대로 저장한다.
+   - **C. 이번엔 생략** — 기다리지 않고 다음 단계로 간다.
 4. `python council/scripts/council.py status $RUN`으로 빠진 응답을 확인한다.
 
 ### 3. Stage 2 — 익명 상호평가

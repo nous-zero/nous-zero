@@ -256,6 +256,7 @@ nous-zero/
 5. Phase A 착수 여부 → 승인 시 Claude Code로 `llm-council` 스킬과 프롬프트 초안 작성
 6. Meta·Grok·Perplexity·GPT 등 위원 확장 → [`02-expanded-members.md`](./02-expanded-members.md) 참고
 7. **Phase A 구현 (2026-10-08)**: [`council/`](../../council/README.md) 폴더와 [`.claude/skills/llm-council`](../../.claude/skills/llm-council/SKILL.md) 스킬. $0 구성(Claude·Gemini·Codex + 브라우저 수동 Meta AI·Perplexity·Grok), 유료 위원은 사용자 요청 전까지 보류
+8. **사용 가이드**: [`03-claude-code-usage-guide.md`](./03-claude-code-usage-guide.md)
 
 ---
 
