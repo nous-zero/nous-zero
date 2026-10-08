@@ -139,3 +139,65 @@
 - Gemini API 의장 프롬프트(답변 전부 + 평가 전부가 들어가는 긴 입력)의 길이·시간 — 미시험. 무료 등급 토큰 한도에 걸릴 수 있음 [추론].
 - 1~5단계 전체 실제 회의 — 한 번도 실행 안 됨 (가짜 위원 테스트만 통과).
 - Windows 레거시 콘솔에서 한글 출력 — 미시험 (스크립트는 UTF-8로 출력 재설정).
+
+---
+
+## ⑤ 검증 안 된 주장 목록
+
+검증 단계: **[미확인]** 출처 없음·찾지 못함 / **[2차]** 서드파티·검색 요약만 확인, 1차 원문 미확인 / **[상충]** 출처끼리 다름 / **[추론]** Claude 판단
+
+| # | 주장 | 단계 | 근거·출처 | 현재 상태 |
+|---|---|---|---|---|
+| U1 | OpenRouter `:free` 모델: 분당 20회, 하루 50회(구매 $10 미만)·1,000회($10 이상) | [2차] | [OpenRouter Limits](https://openrouter.ai/docs/api-reference/limits) (검색 요약, 페이지 직접 열람 실패) | 유료 보류라 미사용 |
+| U2 | ChatGPT 무료 플랜에도 Codex 포함 | [2차] | [OpenAI Help](https://help.openai.com/en/articles/11369540-codex-usage-limits) | PC에서 로그인·ping 성공 → **사용 가능은 실측됨**, 무료 한도는 [미확인] |
+| U3 | Gemini 무료 등급은 Flash 위주, Pro 제외 | [상충] | [Klymentiev](https://klymentiev.com/blog/gemini-api-free-tier), [GeoToolbox](https://geotoolbox.ai/blog/gemini-api-pricing) | Council 2 실측: 무료 키로 Flash 계열 응답 성공 |
+| U4 | Gemini 무료 등급 입력은 구글 제품 개선에 사용 | [2차] | 위 두 자료가 공식 요금표 문구 인용 | 공식 요금 페이지 직접 열람 실패 |
+| U5 | 무료 API 키도 "API 키 인증 영향 없음"에 포함 | [미확인]→**실측으로 부분 해소** | 공지는 "API key authentication"만 언급 ([#28017](https://github.com/google-gemini/gemini-cli/discussions/28017)) | Council 2 실측: 무료 키로 API 직접 호출 성공 (CLI 경유는 미사용) |
+| U6 | Groq가 2026-08-16 Llama 무료 등급 종료 | [2차] | [Groq Deprecations](https://console.groq.com/docs/deprecations) (검색 경유), [ECorpIT](https://ecorpit.com/groq-llama-3-3-70b-shutdown-qwen3-6-27b-preview-replacement-2026/) | 미사용 |
+| U7 | Meta Model API: 2026-07-09 공개, 신규 $20 크레딧, 미국 개발자 대상, Muse Spark 1.3 $1.25/$4.25 | [2차] | [AIChatDaily](https://www.aichatdaily.com/ai-models/meta-opens-muse-spark-1-1-developers-via), [FourWeekMBA](https://fourweekmba.com/ai-meta-muse-spark-1-1-meta-model-api-closed-pivot/), [eesel](https://www.eesel.ai/blog/muse-spark-1-3-pricing) | 한국 가입 여부 [미확인] |
+| U8 | Perplexity Pro 구독자 월 $5 API 크레딧 | [상충] | [Perplexity Help](https://hub-prod.perplexity.ai/hub/faq/pplx-api) vs [Community](https://community.perplexity.ai/t/perplexity-pro-bonus-for-the-api-is-set-to-zero/51) | 구독 안 함(D15) |
+| U9 | Perplexity Sonar Chat Completions 2026-09-27 종료 → Agent API | [2차] | [CloudZero](https://www.cloudzero.com/blog/perplexity-api-pricing/) | 유료 보류 |
+| U10 | Meta·Perplexity 약관의 자동화 관련 조항 | [2차] | ConductAtlas 정리 자료만 ([Meta](https://conductatlas.com/platform/meta/meta-terms-of-service/provision/CA-P-017687/no-automated-data-collection-without-permission/), [Perplexity](https://conductatlas.com/platform/perplexity-ai/perplexity-terms-of-service/provision/CA-P-049606/prohibition-on-scraping-or-automated-data-extraction/)) — 원문 페이지 열람 실패 | 대표님이 사이트 하단 Terms로 직접 확인 권장 |
+| U11 | Grok Build CLI 이용 등급(SuperGrok Heavy 전용 vs SuperGrok·X Premium+) | [상충] | [The Decoder](https://the-decoder.com/x-ai-plays-catch-up-with-grok-build-its-first-terminal-based-coding-agent/), [CodeAgentSwarm](https://www.codeagentswarm.com/en/guides/how-to-use-grok-build) | 유료 보류 |
+| U12 | Grok 4.7 $2/$6, X 검색 게시물 1,000개당 $5(2026-09-21~), 데이터 공유 크레딧 월 $150(되돌릴 수 없음) | [2차] | [MorphLLM](https://www.morphllm.com/grok-api-pricing), [RuntimeWire](https://runtimewire.com/article/xai-is-changing-the-economics-of-x-search-runtimewire-was-built-for-a-narrower-r), [agentdeals](https://agentdeals.dev/vendor/xai) | 유료 보류 |
+| U13 | 무료 Colab 금지 항목(웹 서비스·프록시·SSH 등) | [2차] | [Prodigy 포럼 인용](https://support.prodi.gy/t/is-it-possible-to-install-prodigy-on-google-colab-pro/5416/4), [ColabGeek](https://pypi.org/project/ColabGeek) | 공식 FAQ 열람 실패 |
+| U14 | Kaggle 주당 약 30 GPU시간, 세션 12시간(9시간 설도) | [상충] | [gpuperhour](https://gpuperhour.com/blog/free-cloud-gpus-and-credits), [PyPI kgz](https://pypi.org/p/kgz) | — |
+| U15 | 780M에서 8B 모델 약 15 tok/s | [추론] | 32B 실측 4 tok/s를 크기 비율로 외삽 | 실측 필요 |
+| U16 | YouTube `videos.list` 요청당 최대 50개 ID | [2차] | [OutlierKit](https://outlierkit.com/resources/youtube-api-quota/) | 호출당 1 unit은 [Google 공식](https://developers.google.com/youtube/v3/docs/videos/list) |
+| U17 | Playboard 성장(growth) 순위의 산식과 자동 수집 허용 여부 | [미확인] | [Apify 스크래퍼 설명](https://apify.com/maximedupre/playboard)에 growth 지표가 있다는 것만 확인 | Phase B 전 확인 |
+| U18 | 회의 1회 비용 추정($0.01~0.19, 확장 시 $0.02~0.05) | [추론] | 01·02 문서 계산 | 유료 미사용 |
+| U19 | Claude in Chrome의 사이트별 첫 권한 화면, 각 사이트 로그인 유지 기간 | [미확인] | [Claude Code Chrome 문서](https://code.claude.com/docs/en/chrome)는 권한 관리만 언급 | T5에서 확인 |
+| U20 | Karpathy llm-council 공개일 2025-11-22 | [2차] | [Blockchain News](https://blockchain.news/ainews/llm-council-web-app-multi-model-ai-response-evaluation-using-openrouter-for-enhanced-model-comparison) | 용어 문서에만 사용 |
+| U21 | 중첩 `claude -p` 차단·멈춤 | [2차] | GitHub 이슈 미러 ([#26190](https://claudeissues.com/issue/26190-nested-claude-p-instances-hang-when-claudecode-env-var-is-inherited), [#29543](https://claudeissues.com/issue/29543-bug-claude-print-produces-no-output-when-claudecode-env-var-is-unset-inside-a-se)) | 서브에이전트로 회피 |
+| U22 | 안내서 소요 시간(단계별 분) | [추론] | 03 가이드 3장 | 첫 회의로 실측 |
+
+**과거에 틀렸던 것 (재발 방지)**: "Google AI Pro + Gemini CLI 하루 1,500회", "Gemini는 Google 로그인하면 된다", "Groq 무료로 Llama" — 모두 Council 1이 종료·변경 공지를 확인하지 않고 썼다가 정정함. **유료·무료 정책은 회의 전 최신 공지로 다시 확인.**
+
+---
+
+## ⑥ 첫 안건 «최근 6~12개월 글로벌 급성장 채널 분석»에 대해 모은 것
+
+**자료표(fact-sheet)는 아직 만들지 않았습니다.** 아래는 자료를 모을 때 쓸 출처와 생각입니다.
+
+### 6-1. 확인된 데이터 출처와 제약
+- **Playboard**: 국가·카테고리별 순위와 성장(growth) 순위 제공. 인기 순위는 최근 등록 영상의 조회수·좋아요 기반이며 점수 = 조회수 + 좋아요×10, 구독자 수는 하루 1번 갱신, 구독자 1,000명·누적 조회수 100만 이상 채널만 순위에 듦 ([Playboard About](https://playboard.co/en/about), 검색 요약) [2차]. 성장 산식은 [미확인].
+- **YouTube Data API**: 하루 10,000 unit, `search.list` 100 unit, `videos.list`·`channels.list` 1 unit ([Google 공식](https://developers.google.com/youtube/v3/determine_quota_cost)). 구독자 수는 앞 3자리 반올림, **과거 이력 없음** → 직접 스냅샷 필요 ([Rival IQ](https://help.rivaliq.com/en/articles/9788197-why-youtube-subscriber-counts-are-rounded), [ChannelCrawler](https://channelcrawler.com/insights/beyond-the-youtube-data-api-access-historical-channel-data-trends-channelcrawler)). 지역별 인기 영상은 `videos.list`의 `chart=mostPopular` ([Google 공식](https://developers.google.com/youtube/v3/docs/videos/list)).
+- **vidIQ**: 국가별 최다 구독 채널 목록을 매일 갱신 (교차 확인용, 성장률 아님) ([vidIQ](https://vidiq.com/youtube-stats/top/country/kr/)) [2차].
+- **채점 기준**: `council/rubrics/youtube-growth.md` (데이터 근거 30%, 재현 가능성 20%, 수익화 연결 20%, 생존자 편향 점검 15%, 실행 계획 15%).
+
+### 6-2. 생각 [추론]
+1. **"급성장"부터 정의**: 개설·첫 업로드 12개월 이내 + 최근 90일 **조회수** 증가율 상위 + 영상당 평균 조회수. 구독자는 반올림 값이라 보조 지표로만 (01 문서 4.2).
+2. **영어권 국가부터**: Playboard 미국·영국·캐나다·호주 등 성장 순위에서 후보 20~50개 → API로 채널·최근 영상 지표 수집 → 2~4주 매일 스냅샷 후 판단하면 일시 급등을 거를 수 있음.
+3. **비교군 필수**: 같은 주제·같은 시기에 시작했지만 크지 못한 채널 일부를 넣어 생존자 편향을 줄임 ([Survivorship bias](https://en.wikipedia.org/wiki/Survivorship_bias)).
+4. **수익화 단서 기록**: 스폰서 표기, 제휴 링크, 자체 상품, 멤버십 여부를 채널별로 표에 기록 → 채점 기준 "수익화 연결" 항목의 근거.
+5. **대표님 자산과 연결**: B2B 영업·AI 연구 경력이 강점이 되는 주제(예: AI 도구 실무, 커리어 전환)가 후보에 있으면 재현 가능성 점수에 반영하되, 이는 자료가 아니라 가설로 표시.
+6. 자료표 행마다 출처·수집일 필수, 무료 Gemini에 넘어가므로 비공개 정보 금지 (SKILL.md 규칙 8).
+
+---
+
+## 이어받는 방법 (Council 2용 요약)
+
+1. 이 문서 → `council/README.md` → `.claude/skills/llm-council/SKILL.md` → `council/members.json` 순으로 읽기.
+2. 설계 배경은 `docs/llm-council/01~02`, 사용법은 `03`, Windows 시험 절차는 `04`.
+3. 첫 작업 추천 순서 [추론]: T2(재시도) → T3 → T1(모델 확정) → T4(보류 해제) → T5~T6(연습 회의) → 첫 안건.
+4. Council 1은 이 커밋 이후 이 브랜치를 수정하지 않습니다.
