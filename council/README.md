@@ -34,8 +34,9 @@
 
 ```powershell
 python council/scripts/council.py new "최근 6~12개월 글로벌 급성장 채널 분석" --rubric youtube-growth
-python council/scripts/council.py stage1 council/runs/<run>
-#  → claude / 수동 위원 응답을 stage1/responses/<id>.md 에 저장
+python council/scripts/council.py stage1 council/runs/<run> --prepare   # 프롬프트만 먼저 생성
+python council/scripts/council.py stage1 council/runs/<run>             # Gemini·Codex 병렬 호출
+#  → 같은 시간에 claude(서브에이전트)·브라우저 위원 응답을 stage1/responses/<id>.md 에 저장
 python council/scripts/council.py stage2 council/runs/<run>
 #  → claude 평가를 stage2/responses/claude.md 에 저장
 python council/scripts/council.py stage3 council/runs/<run>
@@ -52,7 +53,7 @@ python council/scripts/council.py status council/runs/<run>
 | 평가자마다 답변 순서 섞기 | stage2 | LLM 평가자의 위치 편향 ([Zheng et al., 2023](https://arxiv.org/abs/2306.05685)) |
 | 채점 기준(루브릭) | `rubrics/` | 의장이 '누가 말했나'가 아니라 기준으로 판단 [추론] |
 | 반론자 순환 | stage2 | 집단사고 방지 [추론] |
-| 의장 교대 (claude ↔ gemini) | stage3 | 의장이 늘 Claude면 결론이 Claude 쪽으로 기울 수 있음 [추론] |
+| 의장 고정: Gemini (사용자 결정) | stage3 | 진행자(Claude Code)와 다른 회사 모델이 종합. 원본 llm-council의 기본 의장도 Gemini ([karpathy/llm-council](https://github.com/karpathy/llm-council)) |
 | 소수 의견 기록 | stage3·decision-log | 나중에 결과와 대조 [추론] |
 | CLI 위원은 빈 임시 폴더에서 실행 | 스크립트 | 에이전트형 CLI가 다른 위원의 답 파일을 읽지 못하게 함 [추론] |
 

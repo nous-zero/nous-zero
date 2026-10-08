@@ -3,7 +3,6 @@
     "output_language": "Korean",
     "default_rubric": "general",
     "chair_rotation": [
-      "claude",
       "gemini"
     ],
     "devil_advocate_rotation": [

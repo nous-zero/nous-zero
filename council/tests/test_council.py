@@ -9,6 +9,7 @@ import json
 import shutil
 import sys
 import tempfile
+import time
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -140,6 +141,34 @@ class PipelineTest(unittest.TestCase):
         log = (run / "decision-log.md").read_text(encoding="utf-8")
         self.assertIn("최종 결론: 테스트", log)
         self.assertIn("| Response A |", log)
+
+    def test_stage1_prepare_writes_prompts_without_calling(self):
+        _, out = self.run_cli("new", "준비만")
+        run = Path(out.strip().splitlines()[-1])
+        code, out = self.run_cli("stage1", str(run), "--prepare")
+        self.assertEqual(code, 0)
+        for member_id in ("fake-a", "fake-b", "claude", "web"):
+            self.assertTrue((run / f"stage1/prompts/{member_id}.md").exists())
+        self.assertFalse((run / "stage1/responses").exists())
+
+    def test_automated_members_are_called_in_parallel(self):
+        slow = self.tmp / "slow_member.py"
+        slow.write_text("import sys, time\nsys.stdin.read()\ntime.sleep(1.5)\nprint('ok')\n", encoding="utf-8")
+        config = json.loads((self.tmp / "members.json").read_text(encoding="utf-8"))
+        config["members"] = [
+            {"id": f"slow-{i}", "label": f"slow-{i}", "type": "command",
+             "command": [sys.executable, str(slow)], "enabled": True}
+            for i in range(3)
+        ]
+        (self.tmp / "members.json").write_text(json.dumps(config), encoding="utf-8")
+        _, out = self.run_cli("new", "병렬")
+        run = Path(out.strip().splitlines()[-1])
+        started = time.monotonic()
+        code, _ = self.run_cli("stage1", str(run))
+        elapsed = time.monotonic() - started
+        self.assertEqual(code, 0)
+        self.assertEqual(len(list((run / "stage1/responses").glob("*.md"))), 3)
+        self.assertLess(elapsed, 4.0, "three 1.5s members should overlap, not take 4.5s in a row")
 
     def test_check_ping_calls_enabled_free_members(self):
         code, out = self.run_cli("check", "--ping")

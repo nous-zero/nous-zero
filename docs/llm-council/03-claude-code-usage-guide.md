@@ -12,9 +12,9 @@
 /llm-council <안건>
    │
    ├─ 1. 자료 정리   Claude Code가 출처 있는 자료표(fact-sheet) 작성 → 내가 확인
-   ├─ 2. 독립 의견   Gemini·GPT(자동) + Claude(서브에이전트) + Meta AI·Perplexity·Grok(브라우저)
+   ├─ 2. 독립 의견   Gemini·GPT(자동) + Claude(서브에이전트) + Meta AI·Perplexity·Grok(브라우저) — 모두 동시에
    ├─ 3. 익명 평가   이름 가린 답변을 Gemini·GPT·Claude가 채점·순위 (반론자 1명)
-   ├─ 4. 의장 종합   Claude ↔ Gemini 번갈아 의장 → 결론·소수 의견·확신도
+   ├─ 4. 의장 종합   Gemini 의장(고정) → 결론·소수 의견·확신도
    └─ 5. 기록        decision-log.md → 나중에 "실행 결과" 기입
 ```
 
@@ -105,9 +105,9 @@ python council/scripts/council.py check --ping
 |---|---|---|---|
 | 0. 점검 | `check` 실행, 꺼진 위원 알림 | — | 수초 |
 | 1. 자료 | run 폴더 생성, 웹 검색 등으로 **출처 있는 자료표** 작성 | 자료 요약을 보고 빠진 데이터 알려주기 | 5~15분 |
-| 2. 독립 의견 | Gemini·Codex 자동 호출, Claude는 서브에이전트로 답변 | 브라우저 위원 방식 선택 (4장) | 5~15분 |
-| 3. 익명 평가 | 답변에 무작위 라벨(Response A, B…) 부여, 평가자마다 순서 섞기, 반론자 지정, 순위 집계 | — | 5~10분 |
-| 4. 의장 종합 | 회의마다 Claude ↔ Gemini 의장 교대, 결론 작성 | — | 2~5분 |
+| 2. 독립 의견 | 프롬프트를 먼저 모두 만든 뒤 **동시에** 진행: Gemini·Codex 병렬 호출(백그라운드) + Claude 서브에이전트 + 브라우저 탭 3개에 질문 전송 → 답이 끝나는 대로 저장 | 브라우저 작업 지켜보기 (4장) | 가장 느린 위원 기준 (🔎 5~10분) |
+| 3. 익명 평가 | 답변에 무작위 라벨(Response A, B…) 부여, 평가자마다 순서 섞기, 반론자 지정 → Gemini·Codex·Claude 평가 **동시 진행** → 순위 집계 | — | 3~8분 |
+| 4. 의장 종합 | **Gemini 의장(고정)** 이 익명 답변·평가·순위를 보고 결론 작성 | — | 2~5분 |
 | 5. 기록 | `decision-log.md` 생성, 결과 보고, 커밋 여부 질문 | 결과 읽기, 커밋 여부 답하기 | — |
 
 - 진행자는 **의견을 내지 않고**, 위원 답변을 고치거나 요약해서 넘기지 않습니다. Claude의 의견은 진행자와 분리된 서브에이전트가 냅니다 ([SKILL.md](../../.claude/skills/llm-council/SKILL.md) 규칙).
@@ -121,7 +121,7 @@ python council/scripts/council.py check --ping
 
 | 방식 | 언제 | 진행 |
 |---|---|---|
-| **A. 브라우저 보조** | Claude in Chrome이 연결되어 있고, 화면을 지켜볼 수 있을 때 | Claude가 새 탭에서 각 사이트를 열고 → 질문 전문을 붙여넣고 → 답변이 끝나면 전체를 복사해 저장. 로그인·CAPTCHA·동의 화면·유료 안내가 나오면 멈추고 나에게 넘김 |
+| **A. 브라우저 보조** | Claude in Chrome이 연결되어 있고, 화면을 지켜볼 수 있을 때 | Gemini·GPT 호출과 **동시에** Claude가 세 사이트를 새 탭으로 열어 질문을 모두 먼저 보내고 → 탭을 돌며 끝난 답변을 전체 복사해 저장. 로그인·CAPTCHA·동의 화면·유료 안내가 나오면 그 탭만 멈추고 나에게 넘김 |
 | **B. 직접 붙여넣기** | 확장 프로그램이 없거나 직접 하고 싶을 때 | `council/runs/<회의>/stage1/prompts/meta-ai.md` 등을 열어 전체 복사 → 사이트에 붙여넣기 → 받은 답변을 Claude Code 채팅에 붙여넣으며 "meta-ai 답변"이라고 알려주기 → Claude가 원문 그대로 저장 |
 | **C. 생략** | 바쁠 때 | Claude·Gemini·GPT 3개 답변만으로 진행 (최소 2개 필요) |
 
@@ -131,12 +131,12 @@ python council/scripts/council.py check --ping
 
 ---
 
-### 4.1 의장은 왜 바뀌나요?
+### 4.1 의장: Gemini 고정 (2026-10-08 사용자 결정)
 
-- LLM 평가자는 자기가 쓴 글을 알아보고 더 높게 평가하는 경향이 있습니다 ([Panickssery et al., NeurIPS 2024](https://arxiv.org/abs/2404.13076)).
-- 🔎 [Claude 추론] 의장이 늘 Claude면 최종 종합이 Claude 쪽 관점으로 기울 수 있어, "Claude만으로는 편향된다"는 처음 목적이 약해집니다. 그래서 회의마다 Claude ↔ Gemini가 번갈아 의장을 맡고, 결과를 쌓아 의장에 따라 결론이 달라지는지 비교할 수 있게 했습니다.
-- 참고로 원본 llm-council의 기본 의장도 Claude가 아니라 Gemini 3 Pro입니다 ([karpathy/llm-council](https://github.com/karpathy/llm-council)).
-- 고정하고 싶으면 "의장은 항상 gemini로"라고 말하거나 `settings.chair_rotation`을 한 명으로 줄이면 됩니다.
+- 의장은 항상 Gemini입니다(`council/members.json`의 `settings.chair_rotation: ["gemini"]`). Gemini CLI로 자동 실행되므로 의장 단계에서 내가 할 일은 없습니다.
+- 원본 llm-council의 기본 의장도 Gemini 3 Pro입니다 ([karpathy/llm-council](https://github.com/karpathy/llm-council)).
+- 의장 호출이 실패하면 Claude가 다른 위원으로 바꾸지 않고 오류를 보고한 뒤 다시 시도합니다. 한 회의만 바꾸고 싶으면 "이번 회의 의장은 claude로"라고 말합니다.
+- 참고: LLM 평가자는 자기가 쓴 글을 알아보고 더 높게 평가하는 경향이 있습니다 ([Panickssery et al., NeurIPS 2024](https://arxiv.org/abs/2404.13076)). Gemini도 위원으로 답을 내므로, 🔎 [Claude 추론] 익명화·채점 기준·소수 의견 기록이 이 영향을 줄이는 장치입니다. 기록이 쌓이면 Gemini 답변(익명 해제 표로 확인)이 최종 결론에 지나치게 자주 채택되는지 점검해 볼 수 있습니다.
 
 ## 5. 결과 읽는 법 (`decision-log.md`)
 
@@ -157,7 +157,7 @@ python council/scripts/council.py check --ping
 |---|---|
 | 첫 안건 | `/llm-council 최근 6~12개월 글로벌 급성장 채널 분석` (Claude가 YouTube 채점 기준 `youtube-growth`를 제안) |
 | 자료를 먼저 같이 모으기 | "카운슬 열기 전에 자료표부터 같이 만들자. 이 데이터도 넣어줘: …" |
-| 의장 지정 | "이번 회의 의장은 gemini로" |
+| 의장 바꾸기 (한 회의만) | "이번 회의 의장은 claude로" (기본은 Gemini 고정) |
 | 브라우저 위원 빼기 | "이번엔 브라우저 위원 생략하고 진행" |
 | 중단된 회의 이어가기 | "council/runs/<회의 폴더> 이어서 진행해줘" (Claude가 `status`로 빠진 단계 확인) |
 | 결과 기록 | "<회의 폴더> decision-log에 실행 결과 기록: 조회수 …" |

@@ -9,12 +9,16 @@ Runs one council meeting in three stages, following karpathy/llm-council:
 Commands:
   check                     check member commands, API keys and local servers
   new "<topic>"             create a run folder (question.md, fact-sheet.md)
-  stage1 <run>              write prompts and collect independent answers
-  stage2 <run>              anonymize answers and collect peer reviews
+  stage1 <run> [--prepare]  write prompts and collect independent answers
+  stage2 <run> [--prepare]  anonymize answers and collect peer reviews
   aggregate <run>           parse FINAL RANKING lines and average the ranks
   stage3 <run> [--chair X]  build (and, if automated, run) the chair prompt
   finalize <run>            write decision-log.md and reveal the label mapping
   status <run>              show which prompts still need a response
+
+Automated members are called in parallel. With --prepare, only the prompt
+files are written, so Claude Code can start subagent and browser members at
+the same time as the CLI calls.
 
 Members of type "subagent" (Claude Code fills the answer with a subagent) and
 "manual" (a person pastes an answer from a browser) are not run here: the
@@ -40,6 +44,7 @@ import tempfile
 import time
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 AUTOMATED_TYPES = {"command", "openai_compatible"}
@@ -218,33 +223,49 @@ def call_openai_compatible(member: dict, prompt: str) -> str:
     return text.strip()
 
 
-def collect(run: Path, stage_dir: str, members: list[dict], prompts: dict[str, str], force: bool) -> list[str]:
-    """Write each member's prompt; run automated members; return waiting ids."""
-    waiting = []
+def collect(run: Path, stage_dir: str, members: list[dict], prompts: dict[str, str],
+            force: bool, prepare_only: bool = False) -> list[str]:
+    """Write every prompt first, then call automated members in parallel.
+
+    Prompt files are all written before any call starts, so Claude Code can
+    work on subagent and browser members at the same time as the CLI calls.
+    Returns the ids of members waiting for someone else to fill a response.
+    """
+    waiting, to_run = [], []
     for m in members:
         if m["id"] not in prompts:
             continue
-        prompt_path = run / stage_dir / "prompts" / f"{m['id']}.md"
-        response_path = run / stage_dir / "responses" / f"{m['id']}.md"
-        write(prompt_path, prompts[m["id"]])
-        if response_path.exists() and not force:
+        write(run / stage_dir / "prompts" / f"{m['id']}.md", prompts[m["id"]])
+        if (run / stage_dir / "responses" / f"{m['id']}.md").exists() and not force:
             print(f"  = {m['id']}: 응답이 이미 있어 건너뜀")
-            continue
-        if m.get("type") in WAITING_TYPES:
+        elif m.get("type") in WAITING_TYPES:
             waiting.append(m["id"])
-            continue
-        print(f"  > {m['id']}: 요청 중...", flush=True)
-        try:
-            text = call_member(m, prompts[m["id"]])
-        except MemberError as e:
-            print(f"  ! {m['id']}: 실패 - {e}")
-            write(run / "logs" / f"{stage_dir}-{m['id']}.log", f"{dt.datetime.now().isoformat()}\n{e}\n")
-            continue
-        write(response_path, text + "\n")
-        print(f"  ✓ {m['id']}: 저장 {response_path.relative_to(run)}")
+        else:
+            to_run.append(m)
     for member_id in waiting:
         print(f"  … {member_id}: 대기 - {stage_dir}/prompts/{member_id}.md 의 답을 "
               f"{stage_dir}/responses/{member_id}.md 에 저장하세요")
+    if prepare_only:
+        for m in to_run:
+            print(f"  · {m['id']}: 프롬프트 준비됨 (--prepare 없이 다시 실행하면 호출)")
+        return waiting
+    if not to_run:
+        return waiting
+
+    print(f"  > 동시 호출: {', '.join(m['id'] for m in to_run)}", flush=True)
+    with ThreadPoolExecutor(max_workers=len(to_run)) as pool:
+        futures = {pool.submit(call_member, m, prompts[m["id"]]): m for m in to_run}
+        for future in as_completed(futures):
+            m = futures[future]
+            try:
+                text = future.result()
+            except MemberError as e:
+                print(f"  ! {m['id']}: 실패 - {e}", flush=True)
+                write(run / "logs" / f"{stage_dir}-{m['id']}.log", f"{dt.datetime.now().isoformat()}\n{e}\n")
+                continue
+            response_path = run / stage_dir / "responses" / f"{m['id']}.md"
+            write(response_path, text + "\n")
+            print(f"  ✓ {m['id']}: 저장 {response_path.relative_to(run)}", flush=True)
     return waiting
 
 
@@ -422,7 +443,7 @@ def cmd_stage1(council: Council, args) -> int:
     members = council.active(1, args.allow_paid)
     prompt = render(council.prompt_template("stage1"), **common_values(council, run, meta))
     print("Stage 1: 독립 의견")
-    collect(run, "stage1", members, {m["id"]: prompt for m in members}, args.force)
+    collect(run, "stage1", members, {m["id"]: prompt for m in members}, args.force, args.prepare)
     return 0
 
 
@@ -473,7 +494,9 @@ def cmd_stage2(council: Council, args) -> int:
             **values,
         )
     print(f"Stage 2: 익명 상호평가 (답변 {len(labels)}개, 반론자: {devil or '없음'})")
-    collect(run, "stage2", reviewers, prompts, args.force)
+    collect(run, "stage2", reviewers, prompts, args.force, args.prepare)
+    if args.prepare:
+        return 0
     return cmd_aggregate(council, args, quiet=True)
 
 
@@ -673,6 +696,8 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("run")
         p.add_argument("--force", action="store_true", help="이미 있는 응답도 다시 요청")
         p.add_argument("--allow-paid", action="store_true", help="유료 위원 허용 (사용자 요청 시에만)")
+        if name in ("stage1", "stage2"):
+            p.add_argument("--prepare", action="store_true", help="프롬프트 파일만 만들고 호출하지 않음")
         if name == "stage3":
             p.add_argument("--chair")
     for name in ("aggregate", "finalize", "status"):

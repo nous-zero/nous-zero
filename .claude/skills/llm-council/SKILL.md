@@ -30,29 +30,30 @@ argument-hint: "<안건>"
 2. `$RUN/fact-sheet.md`를 채운다. 웹 검색·사용자가 준 데이터로 표를 만들고, 행마다 출처 링크와 수집일을 적는다.
 3. 자료 요약을 사용자에게 보여주고, 빠진 데이터가 있는지 확인받는다.
 
-### 2. Stage 1 — 독립 의견
-1. `python council/scripts/council.py stage1 $RUN` — Gemini·Codex 같은 CLI 위원은 스크립트가 자동으로 부른다(몇 분 걸릴 수 있음).
-2. `claude`(서브에이전트): 규칙 3의 문구로 `$RUN/stage1/prompts/claude.md`를 넘기고, 결과를 `$RUN/stage1/responses/claude.md`에 저장한다.
-3. `meta-ai`·`perplexity`·`grok-web`(브라우저 위원): `members.json`의 `settings.browser_mode`를 따른다. 사용자가 이번 회의에서 다른 방식을 말하면 그것을 따른다.
-   - `assist`(기본) → A. 단, Claude in Chrome 도구가 없거나 사용자가 없는 무인 실행(`claude -p` 등)이면 C로 바꾸고 그 사실을 보고한다.
-   - `paste` → B, `skip` → C, `ask` → 회의마다 사용자에게 묻는다.
-   - **A. 브라우저 보조 (사용자가 지켜봄)** — Claude in Chrome 도구가 연결되어 있을 때.
-     1. 위원마다 새 탭에서 `members.json`의 `browser_url`을 열고 새 대화를 시작한다.
-     2. `$RUN/stage1/prompts/<id>.md` 전문을 입력창에 붙여넣고 보낸다.
-     3. 답변 생성이 끝날 때까지 기다린 뒤, 답변 본문 전체를 복사해 `$RUN/stage1/responses/<id>.md`에 원문 그대로 저장한다.
-     4. 로그인 요구, CAPTCHA, 약관·쿠키 동의, 유료 업그레이드 안내가 나오면 그 자리에서 멈추고 사용자에게 넘긴다. 직접 우회하지 않는다.
-   - **B. 직접 붙여넣기** — 사용자가 프롬프트를 사이트에 넣고, 받은 답변을 채팅에 붙여넣으면 진행자가 원문 그대로 저장한다.
-   - **C. 이번엔 생략** — 기다리지 않고 다음 단계로 간다.
-4. `python council/scripts/council.py status $RUN`으로 빠진 응답을 확인한다.
+### 2. Stage 1 — 독립 의견 (모든 위원 동시 진행)
+1. `python council/scripts/council.py stage1 $RUN --prepare` — 모든 위원의 프롬프트 파일을 먼저 만든다(호출 없음, 수초).
+2. 아래 세 갈래를 **같은 응답 안에서 동시에** 시작한다. 하나가 끝나기를 기다렸다가 다음을 시작하지 않는다.
+   - **CLI 위원**: `python council/scripts/council.py stage1 $RUN`을 Bash의 백그라운드 실행으로 띄운다. Gemini·Codex가 스크립트 안에서 병렬로 호출된다.
+   - **Claude**: Agent 도구를 백그라운드로 실행해 규칙 3의 문구로 `$RUN/stage1/prompts/claude.md`를 넘긴다. 결과가 오면 `$RUN/stage1/responses/claude.md`에 저장한다.
+   - **브라우저 위원** (`meta-ai`·`perplexity`·`grok-web`): `settings.browser_mode`를 따른다. 사용자가 이번 회의에서 다른 방식을 말하면 그것을 따른다.
+     - `assist`(기본) → A. 단, Claude in Chrome 도구가 없거나 사용자가 없는 무인 실행(`claude -p` 등)이면 C로 바꾸고 그 사실을 보고한다.
+     - `paste` → B, `skip` → C, `ask` → 회의마다 사용자에게 묻는다.
+     - **A. 브라우저 보조 (사용자가 지켜봄)**
+       1. 세 사이트를 각각 새 탭으로 열고(`browser_url`), 새 대화에 `$RUN/stage1/prompts/<id>.md` 전문을 붙여넣어 **세 곳 모두 먼저 보낸다**. 세 사이트가 동시에 답을 만들게 하기 위해서다.
+       2. 그다음 탭을 하나씩 돌며 답변 생성이 끝났는지 확인하고, 끝난 답변 본문 전체를 `$RUN/stage1/responses/<id>.md`에 원문 그대로 저장한다.
+       3. 로그인 요구, CAPTCHA, 약관·쿠키 동의, 유료 업그레이드 안내가 나오면 그 탭에서 멈추고 사용자에게 넘긴다. 직접 우회하지 않는다. 다른 탭 작업은 계속한다.
+     - **B. 직접 붙여넣기** — 사용자가 프롬프트를 사이트에 넣고, 받은 답변을 채팅에 붙여넣으면 진행자가 원문 그대로 저장한다.
+     - **C. 이번엔 생략** — 기다리지 않는다.
+3. 세 갈래가 모두 끝나면 `python council/scripts/council.py status $RUN`으로 빠진 응답을 확인한다.
 
-### 3. Stage 2 — 익명 상호평가
-1. `python council/scripts/council.py stage2 $RUN` — 라벨(Response A, B…)을 무작위로 붙이고 평가자마다 순서를 섞는다. 반론자(Devil's Advocate)는 회의마다 돌아가며 정해진다.
-2. `claude` 평가: `$RUN/stage2/prompts/claude.md`를 서브에이전트에 넘기고 결과를 `$RUN/stage2/responses/claude.md`에 저장한다.
-3. `python council/scripts/council.py aggregate $RUN` — 평가 마지막 줄의 `FINAL RANKING`을 읽어 평균 순위를 낸다. 읽기 실패한 평가가 있으면 사용자에게 알린다.
+### 3. Stage 2 — 익명 상호평가 (동시 진행)
+1. `python council/scripts/council.py stage2 $RUN --prepare` — 라벨(Response A, B…)을 무작위로 붙이고 평가자마다 순서를 섞은 프롬프트를 만든다. 반론자(Devil's Advocate)는 회의마다 돌아가며 정해진다.
+2. 동시에 시작한다: `python council/scripts/council.py stage2 $RUN`(백그라운드, Gemini·Codex 병렬 평가) + `claude` 평가 서브에이전트(`$RUN/stage2/prompts/claude.md` → `$RUN/stage2/responses/claude.md`).
+3. 둘 다 끝나면 `python council/scripts/council.py aggregate $RUN` — 평가 마지막 줄의 `FINAL RANKING`을 읽어 평균 순위를 낸다. 읽기 실패한 평가가 있으면 사용자에게 알린다.
 
-### 4. Stage 3 — 의장 종합
-1. `python council/scripts/council.py stage3 $RUN` — 의장은 회의마다 `chair_rotation`(claude ↔ gemini) 순서로 바뀐다. 사용자가 원하면 `--chair <id>`.
-2. 의장이 `gemini`면 스크립트가 자동 실행한다. 의장이 `claude`면 `$RUN/stage3/prompt.md`를 서브에이전트에 넘기고 결과를 `$RUN/stage3/final.md`에 저장한다.
+### 4. Stage 3 — 의장 종합 (의장: Gemini 고정)
+1. `python council/scripts/council.py stage3 $RUN` — 사용자 결정에 따라 의장은 항상 `gemini`다(`settings.chair_rotation: ["gemini"]`). 스크립트가 Gemini CLI로 자동 실행한다.
+2. 의장 호출이 실패하면 다른 위원으로 바꾸지 말고 오류를 사용자에게 보고한 뒤 `stage3 $RUN`을 다시 시도한다. 사용자가 이번 회의만 바꾸라고 하면 `--chair <id>`를 쓴다.
 
 ### 5. 기록과 보고
 1. `python council/scripts/council.py finalize $RUN` → `$RUN/decision-log.md` (익명 해제 표 포함).
