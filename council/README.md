@@ -38,7 +38,8 @@
 6. `python council/scripts/council.py check --ping` → `✓ gemini: 성공`과 `의장: gemini — 설정 확인됨`이 나오면 회의를 열 수 있습니다.
 
 - 2026-06-18부터 무료·Google AI Pro·Ultra 개인 계정의 Gemini CLI 사용이 중단되었고, API 키 인증은 영향이 없습니다 ([Gemini CLI 공식 공지 #28017](https://github.com/google-gemini/gemini-cli/discussions/28017)). 그래서 Gemini는 CLI 대신 **API 키로 스크립트가 직접** 부릅니다 ([Gemini OpenAI 호환 문서](https://ai.google.dev/gemini-api/docs/openai)).
-- 무료 등급은 Flash 계열 위주이고, 무료 등급 입력은 구글 제품 개선에 쓰일 수 있습니다 ⚠️ 출처 간 세부 차이 있음 ([Klymentiev](https://klymentiev.com/blog/gemini-api-free-tier), [GeoToolbox](https://geotoolbox.ai/blog/gemini-api-pricing)). 자료표에 비공개 정보를 넣지 마세요.
+- 무료 등급은 Flash 계열 위주이고(최신 Pro는 무료 등급 없음), 무료 등급 입력은 구글 제품 개선에 쓰입니다 — 요금표의 무료 등급 문구 "Content used to improve our products" ([Gemini API 요금](https://ai.google.dev/gemini-api/docs/pricing), 2026-10-07 갱신본 확인). 자료표에 비공개 정보를 넣지 마세요.
+- 2026-10-08 선택 모델: `gemini-3.8-flash`. 무료 등급에서는 `HTTP 503`(수요 몰림)이 띄엄띄엄 납니다 — PC 실측 8회 중 3회, 같은 모델이 몇 초 사이에 성공↔503. 그래서 스크립트가 **429·408·5xx를 2·4·8·16초(+임의 지연) 간격으로 최대 4번 다시 시도**합니다(구글 권고: 지수 백오프, [Gemini API 문제 해결](https://ai.google.dev/gemini-api/docs/troubleshooting)). 위원별로 `"retries": N`을 members.json에 적어 횟수를 바꿀 수 있습니다. 401·400·404 같은 설정 오류는 다시 시도하지 않습니다.
 - **의장(gemini)이 준비되기 전에는 `new`가 회의를 시작하지 않습니다(회의 보류, 사용자 결정).**
 
 ## 사용법

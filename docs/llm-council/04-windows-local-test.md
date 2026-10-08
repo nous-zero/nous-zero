@@ -58,9 +58,9 @@ git pull
 ```powershell
 python -m unittest discover -s council/tests -v
 ```
-**통과 기준**: 마지막에 `Ran 12 tests` 와 `OK`.
+**통과 기준**: 마지막에 `Ran 20 tests` 와 `OK`.
 
-- 이 테스트는 가짜 위원으로 회의 전체(독립 의견 → 익명 평가 → 의장 → 기록), 병렬 호출, 질문 파일 보존, 유료 위원 차단을 확인합니다. 🧪 클라우드(Linux)에서 12개 통과.
+- 이 테스트는 가짜 위원으로 회의 전체(독립 의견 → 익명 평가 → 의장 → 기록), 병렬 호출, 질문 파일 보존, 유료 위원 차단, API 위원의 키 전달·회의 보류·429/503 재시도를 확인합니다. 🧪 PC(Windows 11, Python 3.12)에서 20개 통과 (2026-10-08, `-W error::ResourceWarning`으로도 통과).
 - `test_automated_members_are_called_in_parallel`이 실패하면 Windows에서 병렬 호출이 안 되는 것이니 출력을 보내 주세요.
 
 ---
@@ -112,7 +112,9 @@ python council/scripts/council.py check --ping
   ✓ codex: 성공 (…초) - OK
 ```
 - PC 실측(다른 세션 보고): `✓ codex: 성공 (7.6초)`. Gemini는 API 키 연결 후 다시 확인해야 합니다.
-- `! gemini: 실패 - HTTP 400/404` → model ID 확인, `HTTP 429` → 무료 한도 초과, `환경변수 GEMINI_API_KEY 가 설정되지 않았습니다` → 4단계 환경변수 확인 후 창을 새로 열기.
+- PC 실측(2026-10-08 18:24, `gemini-3.8-flash`): `✓ gemini: 성공 (17.7초)`, `✓ codex: 성공 (5.9초)`, `의장: gemini — 설정 확인됨`.
+- `… gemini: HTTP 503, N초 뒤 다시 시도 (1/4)` 줄은 정상입니다(무료 등급 일시 혼잡 → 자동 재시도).
+- `! gemini: 실패 - HTTP 400/404` → model ID 확인, `HTTP 429 (4회 다시 시도한 뒤)` → 무료 한도 초과일 가능성(AI Studio에서 한도 확인), `HTTP 503 (4회 다시 시도한 뒤)` → 혼잡이 길어진 것이니 몇 분 뒤 다시, `환경변수 GEMINI_API_KEY 가 설정되지 않았습니다` → 4단계 환경변수 확인 후 창을 새로 열기.
 - `시간 초과`가 나오면 네트워크·로그인 문제일 수 있습니다(🧪 클라우드에서는 OpenAI 연결이 막혀 Codex가 계속 재연결했음).
 
 ---
@@ -151,7 +153,7 @@ Claude Code에 입력:
 ```
 **통과 기준**:
 - 독립 의견 단계 출력에 `> 동시 호출: gemini, codex`가 나오고, 두 위원의 `저장 ... (N초)` 시간이 **서로 비슷하게** 끝남 (순서대로라면 두 번째 위원 시간이 첫 번째의 약 두 배가 됨) → Windows에서 병렬 호출 확인.
-- 마지막에 `council\runs\<날짜_연습...>\decision-log.md`가 생기고, 의장이 `Gemini (Gemini CLI)`로 적혀 있음.
+- 마지막에 `council\runs\<날짜_연습...>\decision-log.md`가 생기고, 의장이 `Gemini (Gemini API, 무료 키)`로 적혀 있음.
 
 확인 명령:
 ```powershell

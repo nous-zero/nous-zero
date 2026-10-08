@@ -56,7 +56,7 @@ argument-hint: "<안건>"
 
 ### 4. Stage 3 — 의장 종합 (의장: Gemini 고정)
 1. `python council/scripts/council.py stage3 $RUN` — 사용자 결정에 따라 의장은 항상 `gemini`다(`settings.chair_rotation: ["gemini"]`). 스크립트가 Gemini API(키 방식)로 자동 실행한다.
-2. 의장 호출이 실패하면 다른 위원으로 바꾸지 말고 오류를 사용자에게 보고한 뒤 `stage3 $RUN`을 다시 시도한다. 사용자가 이번 회의만 바꾸라고 하면 `--chair <id>`를 쓴다.
+2. 스크립트는 API 위원의 429·408·5xx를 지수 백오프로 최대 4번 자동 재시도한다(`… HTTP 503, N초 뒤 다시 시도` 줄은 정상). 그래도 의장 호출이 실패하면 다른 위원으로 바꾸지 말고 오류를 사용자에게 보고한 뒤 `stage3 $RUN`을 다시 시도한다. 사용자가 이번 회의만 바꾸라고 하면 `--chair <id>`를 쓴다.
 
 ### 5. 기록과 보고
 1. `python council/scripts/council.py finalize $RUN` → `$RUN/decision-log.md` (익명 해제 표 포함).

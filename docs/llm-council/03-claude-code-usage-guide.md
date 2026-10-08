@@ -197,7 +197,9 @@ python council/scripts/council.py check --ping
 |---|---|
 | `의장: gemini — 준비 안 됨 (...) → 회의 보류` | 1.2의 Gemini API 키 절차를 마치지 않은 상태. 괄호 안 이유(환경변수 없음 / model 값 미정)를 해결 |
 | Gemini 실패: `HTTP 400`·`404` | `model` ID가 틀림. `models gemini --filter flash`로 다시 확인 |
-| Gemini 실패: `HTTP 429` | 무료 등급 한도 초과. 잠시 후 다시 시도 (한도는 AI Studio에서 확인) |
+| `… gemini: HTTP 503, N초 뒤 다시 시도` | 무료 등급 일시 혼잡. 스크립트가 2·4·8·16초 간격으로 최대 4번 자동 재시도하므로 기다리면 됨 |
+| Gemini 실패: `HTTP 429 (4회 다시 시도한 뒤)` | 무료 등급 한도 초과 가능성. 한도는 AI Studio에서 확인하고 잠시 후 해당 단계만 다시 실행 |
+| Gemini 실패: `HTTP 503 (4회 다시 시도한 뒤)` | 혼잡이 30초 넘게 이어짐. 몇 분 뒤 해당 단계만 다시 실행 (받은 답은 건너뜀) |
 | Gemini CLI에서 `IneligibleTierError` | 2026-06-18 개인 계정 중단 때문 ([공지 #28017](https://github.com/google-gemini/gemini-cli/discussions/28017)). Council은 CLI를 쓰지 않으므로 무시 |
 | Codex 실패 (로그인 관련) | `codex login` 다시 실행 |
 | 위원이 `시간 초과` | 네트워크·로그인 문제로 CLI가 재연결을 반복하는 경우가 있음(🧪 이 작업 환경에서 Codex가 네트워크 차단 때문에 계속 재연결). 먼저 `check --ping`으로 확인하고, 응답이 느린 것뿐이면 `council/members.json`의 `timeout`(초)을 늘림 |

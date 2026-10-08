@@ -48,12 +48,12 @@
       "label": "Gemini (Gemini API, 무료 키)",
       "type": "openai_compatible",
       "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
-      "model": "CHANGE_ME",
+      "model": "gemini-3.8-flash",
       "api_key_env": "GEMINI_API_KEY",
       "timeout": 600,
       "enabled": true,
       "paid": false,
-      "note": "2026-06-18부터 개인 계정의 Gemini CLI(Google 로그인)가 중단되어 API 키로 직접 호출한다. aistudio.google.com에서 만든 무료 키를 GEMINI_API_KEY 환경변수에 넣고, `council.py models gemini --filter flash`로 확인한 모델 ID를 model에 적는다. 무료 등급 입력은 구글 제품 개선에 쓰일 수 있다."
+      "note": "2026-06-18부터 개인 계정의 Gemini CLI(Google 로그인)가 중단되어 API 키로 직접 호출한다. aistudio.google.com에서 만든 무료 키를 GEMINI_API_KEY 환경변수에 넣고, `council.py models gemini --filter flash`로 확인한 모델 ID를 model에 적는다. 2026-10-08 대표님 선택: gemini-3.8-flash (PC 실측 8회 중 503 혼잡 3회 → 429·503은 자동 재시도, 기본 4회). 무료 등급 입력은 구글 제품 개선에 쓰인다."
     },
     {
       "id": "codex",
